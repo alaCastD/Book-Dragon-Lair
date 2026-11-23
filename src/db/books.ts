@@ -90,13 +90,14 @@ export async function addBook(db: Db, input: NewBook): Promise<Book> {
   checkRating(input.rating);
 
   const now = new Date().toISOString();
-  const fields = withReadDate({ ...input }, now);
+  const { dateAdded, ...rest } = input;
+  const fields = withReadDate(rest, now);
   const keys = (Object.keys(fields) as Field[]).filter(
     (k) => k in COLUMNS && fields[k] !== undefined,
   );
 
   const cols = [...keys.map((k) => COLUMNS[k]), 'date_added'];
-  const values = [...keys.map((k) => fields[k] ?? null), now];
+  const values = [...keys.map((k) => fields[k] ?? null), dateAdded ?? now];
   const placeholders = cols.map(() => '?').join(', ');
 
   const result = await db.runAsync(

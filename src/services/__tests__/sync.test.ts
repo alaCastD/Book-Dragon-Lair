@@ -128,3 +128,16 @@ it('notifies screens after each change', async () => {
   await syncLibrary(deps(), onChange);
   expect(onChange).toHaveBeenCalled();
 });
+
+it("never replaces a cover photo the user chose", async () => {
+  const book = await scan('9780441172719');
+  await updateBook(db, book.id, { coverLocalUri: 'file:///covers/my-photo.jpg' });
+  const downloadCover = jest.fn(async () => 'file:///covers/downloaded.jpg');
+  await syncLibrary(deps({ downloadCover }));
+  expect(downloadCover).not.toHaveBeenCalled();
+  expect(await getBook(db, book.id)).toMatchObject({
+    title: 'Dune',
+    coverLocalUri: 'file:///covers/my-photo.jpg',
+    coverRemoteUrl: null,
+  });
+});

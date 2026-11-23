@@ -1,5 +1,6 @@
 import { SymbolView } from 'expo-symbols';
-import { Tabs } from 'expo-router';
+import { router, Tabs } from 'expo-router';
+import { Pressable, Text } from 'react-native';
 
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
@@ -23,6 +24,16 @@ export default function TabLayout() {
               tintColor={color}
               size={28}
             />
+          ),
+          headerRight: () => (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Add a book by hand"
+              hitSlop={8}
+              style={{ marginRight: 16 }}
+              onPress={() => router.push('/edit-book')}>
+              <Text style={{ color: Colors[colorScheme].tint, fontSize: 16, fontWeight: '600' }}>+ Add</Text>
+            </Pressable>
           ),
         }}
       />
