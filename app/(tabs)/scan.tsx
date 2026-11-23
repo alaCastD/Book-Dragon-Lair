@@ -16,6 +16,7 @@ import {
 
 import { useColors } from '@/src/components/useColors';
 import { addScannedIsbn, type ScanOutcome } from '@/src/services/addScanned';
+import { requestSync } from '@/src/services/backgroundSync';
 import { formatIsbn } from '@/src/services/isbn';
 
 /** Ignore the same barcode for this long, so holding the camera on a book doesn't repeat. */
@@ -32,7 +33,7 @@ function bannerFor(outcome: ScanOutcome): Banner {
     case 'added':
       return {
         tone: 'success',
-        message: `Added ${formatIsbn(outcome.book.isbn!)}. Details will be filled in when online.`,
+        message: `Added ${formatIsbn(outcome.book.isbn!)}. Looking up its details…`,
         bookId: outcome.book.id,
       };
     case 'duplicate':
@@ -81,6 +82,8 @@ export default function ScanScreen() {
         const outcome = await addScannedIsbn(db, data);
         if (outcome.kind === 'added') {
           setAddedCount((n) => n + 1);
+          requestSync(db); // look it up now if online; otherwise it waits
+
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         } else if (outcome.kind === 'duplicate') {
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);

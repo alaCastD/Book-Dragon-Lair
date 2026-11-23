@@ -2,9 +2,8 @@ import { addBook, findByIsbn, type Db } from '../db';
 import type { NewBook } from '../types';
 
 /**
- * A handful of real books so the library can be tried out before the
- * scanner exists (step 3). Covers load from Open Library while online;
- * they are not saved to the phone yet (that comes in step 4).
+ * A handful of real books for trying the library out. Their covers are
+ * downloaded from Open Library and saved to the phone by the background sync.
  */
 const BOOKS: NewBook[] = [
   {

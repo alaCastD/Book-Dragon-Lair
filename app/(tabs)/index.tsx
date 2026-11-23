@@ -1,6 +1,6 @@
 import { router, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { getCounts, listBooks } from '@/src/db';
@@ -8,6 +8,7 @@ import { BookCard } from '@/src/components/BookCard';
 import { SegmentedControl } from '@/src/components/SegmentedControl';
 import { useColors } from '@/src/components/useColors';
 import type { Book, LibraryCounts, ReadStatus, SortKey } from '@/src/types';
+import { onLibraryChanged } from '@/src/services/libraryEvents';
 import { countsSummary } from '@/src/utils/format';
 
 type Filter = 'all' | ReadStatus;
@@ -53,6 +54,8 @@ export default function LibraryScreen() {
       load();
     }, [load]),
   );
+  // Also reload when books are filled in in the background.
+  useEffect(() => onLibraryChanged(load), [load]);
 
   const libraryEmpty = counts?.total === 0;
 

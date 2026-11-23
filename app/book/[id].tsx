@@ -8,6 +8,9 @@ import { BookCover } from '@/src/components/BookCover';
 import { SegmentedControl } from '@/src/components/SegmentedControl';
 import { StarRating } from '@/src/components/StarRating';
 import { useColors } from '@/src/components/useColors';
+import { requestSync } from '@/src/services/backgroundSync';
+import { deleteCoverFile } from '@/src/services/covers';
+import { onLibraryChanged } from '@/src/services/libraryEvents';
 import type { Book, BookUpdate, ReadStatus } from '@/src/types';
 import { shortDate } from '@/src/utils/format';
 
@@ -39,6 +42,13 @@ export default function BookDetailScreen() {
     });
   }, [db, bookId]);
 
+  // Show details and the cover as soon as a background lookup fills them in.
+  // (Notes aren't reloaded, so nothing being typed is lost.)
+  useEffect(
+    () => onLibraryChanged(() => getBook(db, bookId).then(setBook)),
+    [db, bookId],
+  );
+
   const save = useCallback(
     async (changes: BookUpdate) => {
       // Show the change immediately, then save it to the phone.
@@ -48,6 +58,11 @@ export default function BookDetailScreen() {
     },
     [db, bookId],
   );
+
+  const retryLookup = async () => {
+    await save({ lookupState: 'pending' });
+    requestSync(db);
+  };
 
   const saveNotes = useCallback(() => {
     const value = typedNotes.current.trim() || null;
@@ -69,6 +84,7 @@ export default function BookDetailScreen() {
         onPress: async () => {
           savedNotes.current = typedNotes.current.trim() || null; // nothing left to save
           await deleteBook(db, bookId);
+          deleteCoverFile(book.coverLocalUri);
           router.back();
         },
       },
@@ -122,8 +138,22 @@ export default function BookDetailScreen() {
         <View style={[styles.notice, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <Text style={{ color: colors.text, fontSize: 14, lineHeight: 20 }}>
             This book was scanned and saved. Its title, author, edition and cover will be filled in
-            automatically the next time your phone is online.
+            automatically when your phone is online.
           </Text>
+        </View>
+      )}
+
+      {book.lookupState === 'failed' && (
+        <View style={[styles.notice, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <Text style={{ color: colors.text, fontSize: 14, lineHeight: 20 }}>
+            Neither Open Library nor Google Books has details for this ISBN. You can still rate it and
+            mark it read.
+          </Text>
+          <Pressable accessibilityRole="button" onPress={retryLookup} hitSlop={8}>
+            <Text style={{ color: colors.tint, fontWeight: '600', fontSize: 15, marginTop: 8 }}>
+              Try again
+            </Text>
+          </Pressable>
         </View>
       )}
 

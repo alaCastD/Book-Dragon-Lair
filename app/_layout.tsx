@@ -7,6 +7,7 @@ import 'react-native-reanimated';
 
 import { useColorScheme } from '@/components/useColorScheme';
 import { DATABASE_NAME, migrate } from '@/src/db';
+import { useBackgroundSync } from '@/src/services/backgroundSync';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -51,6 +52,8 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
+  // Fill in details and covers for scanned books whenever the phone is online.
+  useBackgroundSync();
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>

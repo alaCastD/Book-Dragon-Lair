@@ -11,10 +11,10 @@ Built with React Native + Expo (SDK 58), Expo Router and SQLite (`expo-sqlite`).
 | 1 | Project setup and on-device database | ✅ Done |
 | 2 | Library grid (search, filter, sort) and book page (status, star rating, notes) | ✅ Done |
 | 3 | Barcode scanner (works offline), typed-ISBN fallback, duplicate detection | ✅ Done |
-| 4 | Online lookup of title/edition/cover, offline "pending" queue, covers saved to the phone | Planned |
+| 4 | Online lookup of title/edition/cover, offline "pending" queue, covers saved to the phone | ✅ Done |
 | 5 | Manual entry, editing, backup export/import | Planned |
 
-Scanned books are saved immediately, even with no connection, and show as **Pending** with the ISBN as their title. Fetching the real title, edition and cover arrives in step 4. **Settings → Add sample books** adds five complete books to try the library out.
+Scanned books are saved immediately, even with no connection, and show as **Pending** until the phone is online. The app then looks up the exact edition by its ISBN, using [Open Library](https://openlibrary.org) first and [Google Books](https://books.google.com) to fill any gaps (both free, no account needed). It also downloads the cover to the phone, so covers show offline. This happens on its own when the app opens or the connection comes back. Your ratings, Read status and notes are never overwritten. **Settings → Add sample books** adds five books to try the library out.
 
 ## Getting the app on your phone
 
@@ -58,7 +58,7 @@ app/                     Screens (Expo Router: each file is a route)
   book/[id].tsx          Book page
 src/
   db/                    SQLite schema, migrations and queries
-  services/              ISBN validation and adding scanned books
+  services/              ISBN validation, scanning, book lookup, cover saving, background sync
   components/            Cover, star rating, book tile, segmented control
   data/sampleBooks.ts    Sample books for trying the app
   utils/                 Small helpers
