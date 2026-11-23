@@ -29,6 +29,8 @@ function rows<T>(db: Database, sql: string, params: unknown[]): T[] {
 
 // ---------------------------------------------------------------- IndexedDB storage
 
+// Kept from the project's original name on purpose: renaming it would make
+// the website lose libraries already saved in people's browsers.
 const IDB_NAME = 'book-dragon-liar';
 const IDB_STORE = 'files';
 

@@ -1,5 +1,5 @@
 # Publishes the website version to GitHub Pages on every push to main:
-#   https://alacastd.github.io/Book-Dragon-Liar/
+#   https://alacastd.github.io/Book-Dragon-Lair/
 # One-time setup: repo Settings → Pages → Build and deployment → Source: "GitHub Actions".
 name: Publish website
 
@@ -33,12 +33,27 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Pages serves the site from /<repo name>/. Look the name up now (by the
+      # repo's permanent ID) rather than using the name saved with the push, so
+      # re-running an old run after renaming the repo still builds for the
+      # right address.
+      - name: Find the site address
+        id: site
+        run: |
+          name=$(gh api "repositories/${{ github.repository_id }}" --jq .name)
+          echo "Building for /$name/"
+          echo "base=/$name" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
       - name: Build the website
         run: npm run build:web
         env:
           CI: 1
-          # Pages serves this repo's site from /<repo name>/.
-          WEB_BASE_URL: /${{ github.event.repository.name }}
+          WEB_BASE_URL: ${{ steps.site.outputs.base }}
+
+      - name: Check the build points at that address
+        run: grep -q 'src="${{ steps.site.outputs.base }}/_expo/' dist/index.html
 
       # Pages has no "single-page app" setting: serving index.html as the
       # 404 page makes links like /book/12 open the app instead of an error.

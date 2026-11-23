@@ -10,7 +10,7 @@ import { createWebDb, loadSaved } from './webDb';
 
 const DbContext = createContext<Db | null>(null);
 
-/** Where the site is hosted (e.g. "/Book-Dragon-Liar" on GitHub Pages), set at build time. */
+/** Where the site is hosted (e.g. "/Book-Dragon-Lair" on GitHub Pages), set at build time. */
 const BASE_URL = process.env.EXPO_BASE_URL ?? '';
 
 let opening: Promise<Db> | null = null;

@@ -1,4 +1,4 @@
-# Book-Dragon-Liar
+# Book-Dragon-Lair
 
 An Android app to catalog the books you own. Scan a book's barcode to add that exact edition with its cover, mark it **Read** or **To Be Read**, and rate it out of 5 stars. Your library is stored on the phone, so it works without internet and keeps your data between uses.
 
@@ -22,7 +22,7 @@ Books without a barcode can be added with **+ Add** on the Library tab, and any 
 
 ## Website version
 
-The same app runs in a browser at **https://alacastd.github.io/Book-Dragon-Liar/**. It's published automatically by `.github/workflows/web-pages.yml` on every push to `main`.
+The same app runs in a browser at **https://alacastd.github.io/Book-Dragon-Lair/**. It's published automatically by `.github/workflows/web-pages.yml` on every push to `main`.
 
 - The website keeps its library **in that browser on that device**. It's separate from the phone app and from other browsers, and clearing browsing data erases it. Use **Settings → Save a backup** to move books between them (restore the file on the other side).
 - Barcode scanning needs a browser with camera access and barcode support (e.g. Chrome on Android). Typing the ISBN works everywhere.
