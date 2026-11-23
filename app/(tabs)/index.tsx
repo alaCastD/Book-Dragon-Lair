@@ -1,5 +1,5 @@
 import { router, useFocusEffect } from 'expo-router';
-import { useSQLiteContext } from 'expo-sqlite';
+import { useDb } from '@/src/db/DbProvider';
 import { useCallback, useEffect, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
@@ -29,7 +29,7 @@ const SORTS: { value: SortKey; label: string }[] = [
 const COLUMNS = 3;
 
 export default function LibraryScreen() {
-  const db = useSQLiteContext();
+  const db = useDb();
   const colors = useColors();
 
   const [books, setBooks] = useState<Book[]>([]);

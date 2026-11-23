@@ -1,13 +1,18 @@
 import NetInfo from '@react-native-community/netinfo';
-import { useSQLiteContext } from 'expo-sqlite';
+import { useDb } from '../db/DbProvider';
 import { useEffect } from 'react';
-import { AppState } from 'react-native';
+import { AppState, Platform } from 'react-native';
 
 import type { Db } from '../db';
 import { downloadCover } from './covers';
 import { notifyLibraryChanged } from './libraryEvents';
 import { lookupIsbn, type Fetch } from './lookup';
 import { syncLibrary } from './sync';
+
+// In a browser, NetInfo checks for internet by fetching the site's root
+// address, which doesn't exist on GitHub Pages. The browser's own
+// online/offline signal is enough there.
+if (Platform.OS === 'web') NetInfo.configure({ reachabilityShouldRun: () => false });
 
 let running = false;
 let again = false;
@@ -43,7 +48,7 @@ export async function requestSync(db: Db): Promise<void> {
 
 /** Syncs when the app starts, comes back to the foreground, or regains internet. */
 export function useBackgroundSync(): void {
-  const db = useSQLiteContext();
+  const db = useDb();
 
   useEffect(() => {
     requestSync(db);

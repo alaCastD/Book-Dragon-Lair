@@ -18,6 +18,21 @@ Scanned books are saved immediately, even with no connection, and show as **Pend
 
 Books without a barcode can be added with **+ Add** on the Library tab, and any book can be corrected with **Edit** on its page, including taking or choosing a photo for its cover.
 
+## Website version
+
+The same app runs in a browser at **https://alacastd.github.io/Book-Dragon-Liar/**. It's published automatically by `.github/workflows/web-pages.yml` on every push to `main`.
+
+- The website keeps its library **in that browser on that device**. It's separate from the phone app and from other browsers, and clearing browsing data erases it. Use **Settings → Save a backup** to move books between them (restore the file on the other side).
+- Barcode scanning needs a browser with camera access and barcode support (e.g. Chrome on Android). Typing the ISBN works everywhere.
+- Downloaded covers aren't stored offline on the website; the browser shows them from Open Library / Google Books.
+- Under the hood, the website uses SQLite compiled to WebAssembly (sql.js), saved to the browser's IndexedDB storage, because expo-sqlite's web build needs server headers GitHub Pages can't send. Platform-specific code lives in `*.web.ts(x)` files next to the phone versions.
+
+To try the website locally:
+
+```bash
+npm run web
+```
+
 ## Backing up your library
 
 Your library is stored only on your phone. In **Settings**:
@@ -70,7 +85,7 @@ app/                     Screens (Expo Router: each file is a route)
   (tabs)/settings.tsx    Settings
   book/[id].tsx          Book page
 src/
-  db/                    SQLite schema, migrations and queries
+  db/                    SQLite schema, migrations, queries; DbProvider (phone) / DbProvider.web (browser)
   services/              ISBN validation, scanning, book lookup, covers, background sync,
                          add/edit form rules, backup/restore and CSV export
   components/            Cover, star rating, book tile, segmented control

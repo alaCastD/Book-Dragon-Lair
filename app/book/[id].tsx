@@ -1,7 +1,7 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
-import { useSQLiteContext } from 'expo-sqlite';
+import { useDb } from '@/src/db/DbProvider';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { deleteBook, getBook, updateBook } from '@/src/db';
 import { BookCover } from '@/src/components/BookCover';
@@ -13,6 +13,7 @@ import { deleteCoverFile } from '@/src/services/covers';
 import { onLibraryChanged } from '@/src/services/libraryEvents';
 import type { Book, BookUpdate, ReadStatus } from '@/src/types';
 import { shortDate } from '@/src/utils/format';
+import { confirmAction } from '@/src/utils/dialogs';
 
 const STATUS_OPTIONS = [
   { value: 'to_read', label: 'To Be Read' },
@@ -22,7 +23,7 @@ const STATUS_OPTIONS = [
 export default function BookDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const bookId = Number(id);
-  const db = useSQLiteContext();
+  const db = useDb();
   const colors = useColors();
 
   // undefined = still loading, null = not found
@@ -76,19 +77,12 @@ export default function BookDetailScreen() {
 
   const confirmDelete = () => {
     if (!book) return;
-    Alert.alert('Remove this book?', `"${book.title}" will be removed from your library.`, [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Remove',
-        style: 'destructive',
-        onPress: async () => {
-          savedNotes.current = typedNotes.current.trim() || null; // nothing left to save
-          await deleteBook(db, bookId);
-          deleteCoverFile(book.coverLocalUri);
-          router.back();
-        },
-      },
-    ]);
+    confirmAction('Remove this book?', `"${book.title}" will be removed from your library.`, 'Remove', async () => {
+      savedNotes.current = typedNotes.current.trim() || null; // nothing left to save
+      await deleteBook(db, bookId);
+      deleteCoverFile(book.coverLocalUri);
+      router.back();
+    });
   };
 
   if (book === undefined) return <View style={{ flex: 1, backgroundColor: colors.background }} />;
