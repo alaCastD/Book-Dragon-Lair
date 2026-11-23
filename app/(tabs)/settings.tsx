@@ -1,15 +1,17 @@
 import { useDb } from '@/src/db/DbProvider';
-import { useState } from 'react';
-import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
+import { Platform, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 
-import { listBooks } from '@/src/db';
+import { countPendingLookups, listBooks } from '@/src/db';
 import { addSampleBooks } from '@/src/data/sampleBooks';
 import { useColors } from '@/src/components/useColors';
 import { requestSync } from '@/src/services/backgroundSync';
 import { BackupFormatError, buildBackup, importBackup, parseBackup, toCsv } from '@/src/services/backup';
+import { setOnlineAllowed, useOnlineAllowed } from '@/src/services/connection';
 import { readCoverBase64, writeCoverBase64 } from '@/src/services/covers';
 import { openTextFile, saveTextFile } from '@/src/services/files';
-import { notifyLibraryChanged } from '@/src/services/libraryEvents';
+import { notifyLibraryChanged, onLibraryChanged } from '@/src/services/libraryEvents';
 import { showMessage } from '@/src/utils/dialogs';
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -18,6 +20,14 @@ export default function SettingsScreen() {
   const db = useDb();
   const colors = useColors();
   const [busy, setBusy] = useState<string | null>(null);
+  const online = useOnlineAllowed();
+  const [pending, setPending] = useState(0);
+
+  const loadPending = useCallback(() => {
+    countPendingLookups(db).then(setPending);
+  }, [db]);
+  useFocusEffect(loadPending);
+  useEffect(() => onLibraryChanged(loadPending), [loadPending]);
 
   const run = async (label: string, task: () => Promise<void>) => {
     setBusy(label);
@@ -81,12 +91,37 @@ export default function SettingsScreen() {
       const lines = [`${report.added} ${report.added === 1 ? 'book' : 'books'} added.`];
       if (report.alreadyHad) lines.push(`${report.alreadyHad} already in your library (left unchanged).`);
       if (report.skipped) lines.push(`${report.skipped} damaged ${report.skipped === 1 ? 'entry' : 'entries'} skipped.`);
-      if (report.added) lines.push('Covers will download when you are online.');
+      if (report.added) lines.push(online ? 'Covers will download when you are online.' : 'Covers will download when you switch to Online.');
       showMessage('Backup restored', lines.join('\n'));
     });
 
   return (
     <ScrollView style={{ backgroundColor: colors.background }} contentContainerStyle={styles.container}>
+      <Section title="Internet" colors={colors}>
+        <View style={styles.switchRow}>
+          <Text style={[styles.switchLabel, { color: colors.text }]}>
+            {online ? 'Online' : 'Offline'}
+          </Text>
+          <Switch
+            value={online}
+            onValueChange={(v) => setOnlineAllowed(db, v)}
+            accessibilityLabel="Use the internet"
+            trackColor={{ true: colors.online, false: colors.border }}
+          />
+        </View>
+        <Text style={[styles.body, { color: colors.mutedText }]}>
+          {online
+            ? 'The app looks up scanned books and saves their covers whenever it has a connection.'
+            : 'The app won\u2019t use the internet. Scanning, rating and everything else still works; scanned books wait until you switch to Online.'}
+        </Text>
+        {pending > 0 && (
+          <Text style={[styles.note, { color: colors.text }]}>
+            {pending} scanned {pending === 1 ? 'book is' : 'books are'} waiting to be looked up
+            {online ? '.' : ' \u2014 switch to Online to fill in their details.'}
+          </Text>
+        )}
+      </Section>
+
       <Section title="Backup" colors={colors}>
         <Text style={[styles.body, { color: colors.mutedText }]}>
           {Platform.OS === 'web'
@@ -170,6 +205,8 @@ const styles = StyleSheet.create({
   heading: { fontSize: 17, fontWeight: '700' },
   body: { fontSize: 15, lineHeight: 21 },
   note: { fontSize: 13, lineHeight: 18 },
+  switchRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  switchLabel: { fontSize: 16, fontWeight: '600' },
   button: { borderRadius: 10, paddingVertical: 12, alignItems: 'center' },
   buttonText: { fontSize: 15, fontWeight: '600' },
 });

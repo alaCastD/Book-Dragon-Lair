@@ -9,6 +9,7 @@ import { SegmentedControl } from '@/src/components/SegmentedControl';
 import { StarRating } from '@/src/components/StarRating';
 import { useColors } from '@/src/components/useColors';
 import { requestSync } from '@/src/services/backgroundSync';
+import { setOnlineAllowed, useOnlineAllowed } from '@/src/services/connection';
 import { deleteCoverFile } from '@/src/services/covers';
 import { onLibraryChanged } from '@/src/services/libraryEvents';
 import type { Book, BookUpdate, ReadStatus } from '@/src/types';
@@ -25,6 +26,7 @@ export default function BookDetailScreen() {
   const bookId = Number(id);
   const db = useDb();
   const colors = useColors();
+  const online = useOnlineAllowed();
 
   // undefined = still loading, null = not found
   const [book, setBook] = useState<Book | null | undefined>(undefined);
@@ -143,9 +145,17 @@ export default function BookDetailScreen() {
       {book.lookupState === 'pending' && (
         <View style={[styles.notice, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <Text style={{ color: colors.text, fontSize: 14, lineHeight: 20 }}>
-            This book was scanned and saved. Its title, author, edition and cover will be filled in
-            automatically when your phone is online.
+            {online
+              ? 'This book was scanned and saved. Its title, author, edition and cover will be filled in automatically when your phone has a connection.'
+              : 'This book was scanned and saved. The app is set to Offline, so its title, author, edition and cover will be looked up when you switch to Online.'}
           </Text>
+          {!online && (
+            <Pressable accessibilityRole="button" onPress={() => setOnlineAllowed(db, true)} hitSlop={8}>
+              <Text style={{ color: colors.tint, fontWeight: '600', fontSize: 15, marginTop: 8 }}>
+                Go online and look it up
+              </Text>
+            </Pressable>
+          )}
         </View>
       )}
 

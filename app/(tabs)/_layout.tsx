@@ -1,6 +1,8 @@
 import { SymbolView } from 'expo-symbols';
 import { router, Tabs } from 'expo-router';
-import { Pressable, Text } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
+
+import { ConnectionToggle } from '@/src/components/ConnectionToggle';
 
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
@@ -26,14 +28,16 @@ export default function TabLayout() {
             />
           ),
           headerRight: () => (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Add a book by hand"
-              hitSlop={8}
-              style={{ marginRight: 16 }}
-              onPress={() => router.push('/edit-book')}>
-              <Text style={{ color: Colors[colorScheme].tint, fontSize: 16, fontWeight: '600' }}>+ Add</Text>
-            </Pressable>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, marginRight: 16 }}>
+              <ConnectionToggle />
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Add a book by hand"
+                hitSlop={8}
+                onPress={() => router.push('/edit-book')}>
+                <Text style={{ color: Colors[colorScheme].tint, fontSize: 16, fontWeight: '600' }}>+ Add</Text>
+              </Pressable>
+            </View>
           ),
         }}
       />
@@ -41,6 +45,11 @@ export default function TabLayout() {
         name="scan"
         options={{
           title: 'Scan',
+          headerRight: () => (
+            <View style={{ marginRight: 16 }}>
+              <ConnectionToggle />
+            </View>
+          ),
           tabBarIcon: ({ color }) => (
             <SymbolView
               name={{ ios: 'barcode.viewfinder', android: 'barcode_scanner', web: 'barcode_scanner' }}

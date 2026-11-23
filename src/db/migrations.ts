@@ -34,6 +34,13 @@ export const MIGRATIONS: string[] = [
   CREATE INDEX idx_books_status ON books (status);
   CREATE INDEX idx_books_lookup_state ON books (lookup_state);
   `,
+  // v2 — app settings (e.g. whether the app may use the internet)
+  `
+  CREATE TABLE settings (
+    key   TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+  );
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

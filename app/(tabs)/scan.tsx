@@ -17,6 +17,7 @@ import {
 import { useColors } from '@/src/components/useColors';
 import { addScannedIsbn, type ScanOutcome } from '@/src/services/addScanned';
 import { requestSync } from '@/src/services/backgroundSync';
+import { isOnlineAllowed } from '@/src/services/connection';
 import { formatIsbn } from '@/src/services/isbn';
 
 /** Ignore the same barcode for this long, so holding the camera on a book doesn't repeat. */
@@ -28,12 +29,14 @@ interface Banner {
   bookId?: number;
 }
 
-function bannerFor(outcome: ScanOutcome): Banner {
+function bannerFor(outcome: ScanOutcome, online: boolean): Banner {
   switch (outcome.kind) {
     case 'added':
       return {
         tone: 'success',
-        message: `Added ${formatIsbn(outcome.book.isbn!)}. Looking up its details…`,
+        message: online
+          ? `Added ${formatIsbn(outcome.book.isbn!)}. Looking up its details…`
+          : `Added ${formatIsbn(outcome.book.isbn!)}. You're offline: its details will be looked up when you switch to Online.`,
         bookId: outcome.book.id,
       };
     case 'duplicate':
@@ -82,7 +85,7 @@ export default function ScanScreen() {
         const outcome = await addScannedIsbn(db, data);
         if (outcome.kind === 'added') {
           setAddedCount((n) => n + 1);
-          requestSync(db); // look it up now if online; otherwise it waits
+          requestSync(db); // looks it up now if set to Online; otherwise it waits
 
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         } else if (outcome.kind === 'duplicate') {
@@ -90,7 +93,7 @@ export default function ScanScreen() {
         } else {
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         }
-        setBanner(bannerFor(outcome));
+        setBanner(bannerFor(outcome, isOnlineAllowed()));
         return outcome;
       } catch (e) {
         setBanner({ tone: 'error', message: `Couldn't save that book: ${(e as Error).message}` });

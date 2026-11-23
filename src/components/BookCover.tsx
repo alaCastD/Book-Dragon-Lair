@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Image, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import type { Book } from '../types';
+import { useOnlineAllowed } from '../services/connection';
 import { coverUri } from '../utils/format';
 import { useColors } from './useColors';
 
@@ -15,7 +16,8 @@ interface Props {
 /** A book cover at a 2:3 ratio. Shows the title on a plain card when no image is available. */
 export function BookCover({ book, style, fallbackFontSize = 13 }: Props) {
   const colors = useColors();
-  const uri = coverUri(book);
+  const online = useOnlineAllowed();
+  const uri = coverUri(book, online);
   // Remember which address failed, so a new cover (e.g. after editing) is tried again.
   const [failedUri, setFailedUri] = useState<string | null>(null);
 

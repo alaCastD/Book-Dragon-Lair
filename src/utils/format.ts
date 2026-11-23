@@ -1,8 +1,18 @@
 import type { Book } from '../types';
 
-/** The best available cover: the copy saved on the phone, otherwise the web address. */
-export function coverUri(book: Pick<Book, 'coverLocalUri' | 'coverRemoteUrl'>): string | null {
-  return book.coverLocalUri ?? book.coverRemoteUrl ?? null;
+const isWebAddress = (uri: string) => /^https?:\/\//i.test(uri);
+
+/**
+ * The best available cover: the copy saved on the phone, otherwise the web
+ * address. With `allowInternet` false (Offline mode), web addresses are
+ * skipped so nothing is downloaded.
+ */
+export function coverUri(
+  book: Pick<Book, 'coverLocalUri' | 'coverRemoteUrl'>,
+  allowInternet = true,
+): string | null {
+  const candidates = [book.coverLocalUri, book.coverRemoteUrl].filter((u): u is string => !!u);
+  return candidates.find((u) => allowInternet || !isWebAddress(u)) ?? null;
 }
 
 /** "12 books · 5 read · 7 to be read" */
