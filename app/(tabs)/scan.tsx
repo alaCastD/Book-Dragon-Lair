@@ -125,7 +125,7 @@ export default function ScanScreen() {
 
   if (!permission) {
     return (
-      <View style={[styles.center, { backgroundColor: colors.background }]}>
+      <View style={[styles.center, { backgroundColor: 'transparent' }]}>
         <ActivityIndicator />
       </View>
     );
@@ -133,7 +133,7 @@ export default function ScanScreen() {
 
   if (!permission.granted) {
     return (
-      <View style={[styles.center, { backgroundColor: colors.background }]}>
+      <View style={[styles.center, { backgroundColor: 'transparent' }]}>
         <Text style={[styles.permTitle, { color: colors.text }]}>Camera access needed</Text>
         <Text style={[styles.permText, { color: colors.mutedText }]}>
           The camera is used only to read book barcodes. Nothing is recorded or uploaded.
@@ -193,7 +193,7 @@ export default function ScanScreen() {
         )}
 
         {typing ? (
-          <View style={[styles.typeRow, { backgroundColor: colors.background }]}>
+          <View style={[styles.typeRow, { backgroundColor: colors.card }]}>
             <TextInput
               value={typed}
               onChangeText={setTyped}

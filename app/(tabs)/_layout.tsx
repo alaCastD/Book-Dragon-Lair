@@ -13,7 +13,13 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme].tint,
+        tabBarActiveTintColor: Colors[colorScheme].tabIconSelected,
+        tabBarInactiveTintColor: Colors[colorScheme].tabIconDefault,
+        tabBarStyle: { backgroundColor: Colors[colorScheme].base, borderTopColor: Colors[colorScheme].border },
+        headerStyle: { backgroundColor: Colors[colorScheme].base },
+        headerTintColor: Colors[colorScheme].text,
+        headerShadowVisible: false,
+        sceneStyle: { backgroundColor: 'transparent' },
         headerShown: true,
       }}>
       <Tabs.Screen

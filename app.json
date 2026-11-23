@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Book Inventory",
-    "slug": "book-inventory",
+    "name": "Book Dragon Lair",
+    "slug": "book-dragon-lair",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "bookinventory",
+    "scheme": "bookdragonlair",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true
@@ -27,7 +27,9 @@
     "web": {
       "bundler": "metro",
       "output": "single",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/favicon.png",
+      "name": "Book Dragon Lair",
+      "shortName": "Dragon Lair"
     },
     "plugins": [
       "expo-router",
@@ -43,7 +45,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Book Inventory uses the camera to scan book barcodes.",
+          "cameraPermission": "Book Dragon Lair uses the camera to scan book barcodes.",
           "microphonePermission": false,
           "recordAudioAndroid": false
         }
@@ -52,8 +54,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Book Inventory lets you pick a photo to use as a book cover.",
-          "cameraPermission": "Book Inventory uses the camera to scan book barcodes and photograph covers.",
+          "photosPermission": "Book Dragon Lair lets you pick a photo to use as a book cover.",
+          "cameraPermission": "Book Dragon Lair uses the camera to scan book barcodes and photograph covers.",
           "microphonePermission": false
         }
       ]

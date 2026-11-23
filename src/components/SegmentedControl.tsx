@@ -22,7 +22,7 @@ export function SegmentedControl<T extends string>({ options, value, onChange }:
             key={o.value}
             onPress={() => onChange(o.value)}
             accessibilityRole="radio"
-            accessibilityState={{ selected }}
+            aria-checked={selected}
             style={[styles.segment, selected && { backgroundColor: colors.tint }]}>
             <Text
               style={[styles.label, { color: selected ? colors.onTint : colors.text }]}

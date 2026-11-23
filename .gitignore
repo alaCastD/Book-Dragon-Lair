@@ -42,3 +42,4 @@ yarn-error.*
 
 # web version: copied from node_modules by scripts/copy-sqljs-wasm.js
 public/sql-wasm-browser.wasm
+background-previews/

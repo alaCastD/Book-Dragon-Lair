@@ -91,10 +91,10 @@ export function parseBackup(text: string): { books: BackupBook[]; skipped: numbe
   try {
     data = JSON.parse(text);
   } catch {
-    throw new BackupFormatError("This file isn't a Book Inventory backup (it isn't readable).");
+    throw new BackupFormatError("This file isn't a Book Dragon Lair backup (it isn't readable).");
   }
   if (data?.format !== BACKUP_FORMAT || !Array.isArray(data.books)) {
-    throw new BackupFormatError("This file isn't a Book Inventory backup.");
+    throw new BackupFormatError("This file isn't a Book Dragon Lair backup.");
   }
   if (typeof data.version !== 'number' || data.version > BACKUP_VERSION) {
     throw new BackupFormatError('This backup was made by a newer version of the app. Update the app first.');

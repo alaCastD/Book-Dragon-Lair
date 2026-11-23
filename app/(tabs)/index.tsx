@@ -100,7 +100,7 @@ export default function LibraryScreen() {
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.container, { backgroundColor: 'transparent' }]}>
       <FlatList
         data={books}
         keyExtractor={(b) => String(b.id)}

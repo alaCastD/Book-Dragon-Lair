@@ -1,4 +1,4 @@
-# Book-Dragon-Lair
+# Book Dragon Lair
 
 An Android app to catalog the books you own. Scan a book's barcode to add that exact edition with its cover, mark it **Read** or **To Be Read**, and rate it out of 5 stars. Your library is stored on the phone, so it works without internet and keeps your data between uses.
 
@@ -15,6 +15,8 @@ Built with React Native + Expo (SDK 58), Expo Router and SQLite (`expo-sqlite`).
 | 5 | Add books by hand, edit details, cover photos, backup and restore, spreadsheet export | ✅ Done |
 
 Scanned books are saved immediately, even with no connection, and show as **Pending** until the phone is online. The app then looks up the exact edition by its ISBN, using [Open Library](https://openlibrary.org) first and [Google Books](https://books.google.com) to fill any gaps (both free, no account needed). It also downloads the cover to the phone, so covers show offline. This happens on its own when the app opens or the connection comes back. Your ratings, Read status and notes are never overwritten. **Settings → Add sample books** adds five books to try the library out.
+
+**Look and feel.** Sage green (`#9CAF88`) is the base color, with deeper greens for buttons and text so everything stays readable, and cream "paper" cards. **Settings → Background** offers three bookish patterns: *Book doodles* (default), *Bookshelf* and *Notebook pages*. The choice is remembered. The drawings are SVGs in `assets/backgrounds/src/`; after editing one, run `node scripts/render-backgrounds.js` to regenerate the PNGs.
 
 **Online / Offline switch.** The pill at the top of the Library and Scan tabs (also in **Settings → Internet**) decides whether the app may use the internet. While **Offline**, the app makes no requests at all: no lookups, no cover downloads, and covers aren't loaded from the web. Scanned books wait as *Pending* until you switch to **Online**, which starts the lookups straight away. The choice is remembered. Default: Online.
 
@@ -49,7 +51,7 @@ Your library is stored only on your phone. In **Settings**:
 Every push to `main` builds an installable APK with GitHub Actions (`.github/workflows/android-apk.yml`). No Expo account needed.
 
 1. On GitHub, open the **Actions** tab → the latest **Build Android APK** run.
-2. Under **Artifacts**, download `book-inventory-apk` (a zip) and unzip it to get `app-release.apk`.
+2. Under **Artifacts**, download `book-dragon-lair-apk` (a zip) and unzip it to get `app-release.apk`.
 3. Copy it to your phone and open it. Android will ask you to allow installing apps from that source.
 
 To update, install the newer APK over the old one; your library is kept.
@@ -57,6 +59,8 @@ To update, install the newer APK over the old one; your library is kept.
 The APK is built for 64-bit ARM phones (`arm64-v8a`), which covers practically every Android phone from about 2017 onward. It won't install on an x86 emulator.
 
 > The APK is signed with Android's standard debug key, which is fine for installing on your own phone but not for the Play Store. If you ever install a build signed with a different key, Android will require uninstalling first, **which deletes the library**. Save a backup (Settings → Save a backup) before doing that.
+
+> The Android package ID stays `com.bookinventory.app` (from the app's first name) on purpose: changing it would make Android treat the renamed app as a different app, so it wouldn't update the installed one or keep its library.
 
 ## Development
 

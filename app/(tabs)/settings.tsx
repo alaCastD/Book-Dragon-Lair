@@ -5,6 +5,7 @@ import { Platform, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 
 
 import { countPendingLookups, listBooks } from '@/src/db';
 import { addSampleBooks } from '@/src/data/sampleBooks';
+import { BackgroundPicker } from '@/src/components/BackgroundPicker';
 import { useColors } from '@/src/components/useColors';
 import { requestSync } from '@/src/services/backgroundSync';
 import { BackupFormatError, buildBackup, importBackup, parseBackup, toCsv } from '@/src/services/backup';
@@ -64,7 +65,7 @@ export default function SettingsScreen() {
         return;
       }
       await saveTextFile(
-        `book-inventory-backup-${today()}.json`,
+        `book-dragon-lair-backup-${today()}.json`,
         JSON.stringify(backup),
         'application/json',
         'Save your library backup',
@@ -78,7 +79,7 @@ export default function SettingsScreen() {
         showMessage('Nothing to export', 'Your library is empty.');
         return;
       }
-      await saveTextFile(`book-inventory-${today()}.csv`, toCsv(books), 'text/csv', 'Export your library');
+      await saveTextFile(`book-dragon-lair-${today()}.csv`, toCsv(books), 'text/csv', 'Export your library');
     });
 
   const onRestore = () =>
@@ -98,7 +99,7 @@ export default function SettingsScreen() {
     });
 
   return (
-    <ScrollView style={{ backgroundColor: colors.background }} contentContainerStyle={styles.container}>
+    <ScrollView style={{ backgroundColor: 'transparent' }} contentContainerStyle={styles.container}>
       <Section title="Internet" colors={colors}>
         <View style={styles.switchRow}>
           <Text style={[styles.switchLabel, { color: colors.text }]}>
@@ -109,6 +110,9 @@ export default function SettingsScreen() {
             onValueChange={(v) => setOnlineAllowed(db, v)}
             accessibilityLabel="Use the internet"
             trackColor={{ true: colors.online, false: colors.border }}
+            thumbColor={colors.card}
+            // The website's switch takes a separate color for the "on" knob.
+            {...(Platform.OS === 'web' ? { activeThumbColor: colors.card } : {})}
           />
         </View>
         <Text style={[styles.body, { color: colors.mutedText }]}>
@@ -128,6 +132,10 @@ export default function SettingsScreen() {
         {online && pending > 0 && (
           <Button label="Look up now" onPress={() => requestSync(db)} busy={false} disabled={!!busy} colors={colors} />
         )}
+      </Section>
+
+      <Section title="Background" colors={colors}>
+        <BackgroundPicker />
       </Section>
 
       <Section title="Backup" colors={colors}>
