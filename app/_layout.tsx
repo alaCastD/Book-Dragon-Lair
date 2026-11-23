@@ -6,6 +6,8 @@ import 'react-native-reanimated';
 
 import { useColorScheme } from '@/components/useColorScheme';
 import { DbProvider } from '@/src/db/DbProvider';
+import { AppBackground } from '@/src/components/AppBackground';
+import Colors from '@/constants/Colors';
 import { useBackgroundSync, useConnectionSettingLoaded } from '@/src/services/backgroundSync';
 
 export {
@@ -55,12 +57,37 @@ function RootLayoutNav() {
   if (!ready) return null;
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
+    <ThemeProvider value={navigationTheme(colorScheme)}>
+      <AppBackground>
+      <Stack
+        screenOptions={{
+          contentStyle: { backgroundColor: 'transparent' },
+          headerStyle: { backgroundColor: Colors[colorScheme].base },
+          headerTintColor: Colors[colorScheme].text,
+          headerShadowVisible: false,
+        }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="book/[id]" options={{ title: '' }} />
         <Stack.Screen name="edit-book" options={{ title: '' }} />
       </Stack>
+      </AppBackground>
     </ThemeProvider>
   );
+}
+
+/** Navigation colors: transparent screens (so the background shows) and sage bars. */
+function navigationTheme(scheme: 'light' | 'dark') {
+  const base = scheme === 'dark' ? DarkTheme : DefaultTheme;
+  const c = Colors[scheme];
+  return {
+    ...base,
+    colors: {
+      ...base.colors,
+      primary: c.tint,
+      background: 'transparent',
+      card: c.base,
+      text: c.text,
+      border: c.border,
+    },
+  };
 }

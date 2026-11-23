@@ -1,5 +1,5 @@
 # Builds an installable Android app (APK) on every push to main.
-# Download it from the run's page: Actions tab → latest run → "Artifacts" → book-inventory-apk.
+# Download it from the run's page: Actions tab → latest run → "Artifacts" → book-dragon-lair-apk.
 name: Build Android APK
 
 on:
@@ -50,6 +50,6 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: book-inventory-apk
+          name: book-dragon-lair-apk
           path: android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error

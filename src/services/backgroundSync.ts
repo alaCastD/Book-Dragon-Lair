@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { AppState, Platform } from 'react-native';
 
 import type { Db } from '../db';
+import { loadBackgroundSetting } from './appearance';
 import { isOnlineAllowed, loadConnectionSetting, subscribeConnection } from './connection';
 import { downloadCover } from './covers';
 import { notifyLibraryChanged } from './libraryEvents';
@@ -82,15 +83,16 @@ export function useBackgroundSync(ready: boolean): void {
 }
 
 /**
- * Loads the saved Online / Offline choice. Screens wait for it, so nothing
- * reaches the internet before the app knows it's allowed to.
+ * Loads the saved settings (Online / Offline and the background). Screens
+ * wait for them, so nothing reaches the internet before the app knows it's
+ * allowed to, and the right background shows from the start.
  */
 export function useConnectionSettingLoaded(): boolean {
   const db = useDb();
   const [loaded, setLoaded] = useState(false);
   useEffect(() => {
-    loadConnectionSetting(db)
-      .catch((e) => console.warn('Could not read the Online/Offline setting', e))
+    Promise.all([loadConnectionSetting(db), loadBackgroundSetting(db)])
+      .catch((e) => console.warn('Could not read saved settings', e))
       .finally(() => setLoaded(true));
   }, [db]);
   return loaded;

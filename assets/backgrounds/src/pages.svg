@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240">
+  <!-- Option C: quiet notebook paper, ruled lines, with a small dragon-and-book emblem. -->
+  <rect width="240" height="240" fill="#9CAF88"/>
+  <g stroke="#8CA078" stroke-width="1" stroke-opacity="0.7">
+    <path d="M0 20h240M0 50h240M0 80h240M0 110h240M0 140h240M0 170h240M0 200h240M0 230h240"/>
+  </g>
+  <!-- emblem: a book with a small dragon curled on top -->
+  <g transform="translate(150 118)" fill="none" stroke="#7A8F68" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.55">
+    <path d="M0 18c9-5 19-5 26 0v22c-7-5-17-5-26 0z"/>
+    <path d="M26 18c7-5 17-5 26 0v22c-9-5-19-5-26 0"/>
+    <!-- dragon: body arc, head, wing, tail curl -->
+    <path d="M6 14c6-10 26-12 38-4"/>
+    <path d="M44 10c4-2 8 0 9 3-3 1-6 1-9-3z"/>
+    <path d="M20 6c2-8 10-12 16-10-2 5-7 8-16 10z"/>
+    <path d="M6 14c-6 0-8-6-4-8"/>
+  </g>
+  <g transform="translate(30 30)" fill="none" stroke="#7A8F68" stroke-width="1.8" stroke-linecap="round" stroke-opacity="0.4">
+    <path d="M0 0h14v20l-7-5-7 5z"/>
+  </g>
+</svg>

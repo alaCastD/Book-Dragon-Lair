@@ -30,7 +30,7 @@ export function BookCard({ book, onPress }: Props) {
         )}
         {book.lookupState === 'pending' && (
           <View style={[styles.badge, { backgroundColor: colors.mutedText }]}>
-            <Text style={[styles.badgeText, { color: colors.background }]}>Pending</Text>
+            <Text style={[styles.badgeText, { color: colors.card }]}>Pending</Text>
           </View>
         )}
       </View>

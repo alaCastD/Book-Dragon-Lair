@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240">
+  <!-- Option B: scattered line drawings of books, a quill, a bookmark and leaves. -->
+  <rect width="240" height="240" fill="#9CAF88"/>
+  <g fill="none" stroke="#7A8F68" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.55">
+    <!-- open book -->
+    <g transform="translate(22 28)">
+      <path d="M0 8c10-6 22-6 30 0v30c-8-6-20-6-30 0z"/>
+      <path d="M30 8c8-6 20-6 30 0v30c-10-6-22-6-30 0"/>
+      <path d="M6 16c6-2 12-2 18 1M6 24c6-2 12-2 18 1M36 17c6-3 12-3 18-1M36 25c6-3 12-3 18-1"/>
+    </g>
+    <!-- stack of books -->
+    <g transform="translate(150 22) rotate(6)">
+      <rect x="0" y="0" width="52" height="12" rx="2"/>
+      <rect x="4" y="12" width="46" height="12" rx="2"/>
+      <rect x="-2" y="24" width="54" height="12" rx="2"/>
+      <path d="M8 0v12M44 12v12M6 24v12"/>
+    </g>
+    <!-- quill -->
+    <g transform="translate(96 108) rotate(-30)">
+      <path d="M0 0c18-6 34-2 44 8-12 2-26 6-40 0z"/>
+      <path d="M2 2l42 6M-10 4l12-2"/>
+    </g>
+    <!-- bookmark -->
+    <g transform="translate(196 128) rotate(-8)">
+      <path d="M0 0h18v34l-9-7-9 7z"/>
+    </g>
+    <!-- closed book -->
+    <g transform="translate(30 150) rotate(-14)">
+      <rect x="0" y="0" width="34" height="44" rx="3"/>
+      <path d="M6 0v44M12 12h16M12 18h12"/>
+    </g>
+    <!-- leaf sprig -->
+    <g transform="translate(128 192) rotate(18)">
+      <path d="M0 0c10 0 30 2 44-10"/>
+      <path d="M12 -1c0-8 6-12 12-12 0 7-5 12-12 12zM26 -4c2-8 9-10 14-9-1 7-7 10-14 9zM16 1c4 7 11 9 16 7-3-6-9-8-16-7z"/>
+    </g>
+  </g>
+  <!-- tiny sparkles -->
+  <g fill="#B3C3A1" fill-opacity="0.8">
+    <circle cx="112" cy="40" r="2.2"/><circle cx="70" cy="110" r="1.8"/><circle cx="214" cy="92" r="2"/>
+    <circle cx="96" cy="224" r="2.2"/><circle cx="12" cy="104" r="1.6"/><circle cx="188" cy="212" r="1.8"/>
+  </g>
+</svg>

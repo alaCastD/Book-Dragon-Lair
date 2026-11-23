@@ -127,7 +127,7 @@ export default function EditBookScreen() {
 
   if (loading) {
     return (
-      <View style={[styles.center, { backgroundColor: colors.background }]}>
+      <View style={[styles.center, { backgroundColor: 'transparent' }]}>
         <ActivityIndicator />
       </View>
     );
@@ -179,7 +179,7 @@ export default function EditBookScreen() {
     <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
       <Stack.Screen options={{ title: editing ? 'Edit book' : 'Add a book' }} />
       <ScrollView
-        style={{ backgroundColor: colors.background }}
+        style={{ backgroundColor: 'transparent' }}
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled">
         <View style={styles.coverRow}>

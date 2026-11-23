@@ -89,11 +89,11 @@ export default function BookDetailScreen() {
     });
   };
 
-  if (book === undefined) return <View style={{ flex: 1, backgroundColor: colors.background }} />;
+  if (book === undefined) return <View style={{ flex: 1, backgroundColor: 'transparent' }} />;
 
   if (book === null) {
     return (
-      <View style={[styles.center, { backgroundColor: colors.background }]}>
+      <View style={[styles.center, { backgroundColor: 'transparent' }]}>
         <Stack.Screen options={{ title: 'Not found' }} />
         <Text style={{ color: colors.text, fontSize: 16 }}>This book is no longer in your library.</Text>
       </View>
@@ -114,7 +114,7 @@ export default function BookDetailScreen() {
 
   return (
     <ScrollView
-      style={{ backgroundColor: colors.background }}
+      style={{ backgroundColor: 'transparent' }}
       contentContainerStyle={styles.content}
       keyboardShouldPersistTaps="handled">
       <Stack.Screen
@@ -124,6 +124,7 @@ export default function BookDetailScreen() {
             <Pressable
               accessibilityRole="button"
               hitSlop={8}
+              style={{ marginRight: 8 }}
               onPress={() => router.push({ pathname: '/edit-book', params: { id: String(book.id) } })}>
               <Text style={{ color: colors.tint, fontSize: 16, fontWeight: '600' }}>Edit</Text>
             </Pressable>

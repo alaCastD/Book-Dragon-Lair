@@ -16,7 +16,7 @@ export function StarRating({ rating, onChange, size = 32 }: Props) {
   const stars = [1, 2, 3, 4, 5].map((n) => {
     const filled = n <= rating;
     const glyph = (
-      <Text style={{ fontSize: size, lineHeight: size * 1.15, color: filled ? colors.star : colors.border }}>
+      <Text style={{ fontSize: size, lineHeight: size * 1.15, color: filled ? colors.star : colors.starEmpty }}>
         {filled ? '★' : '☆'}
       </Text>
     );
