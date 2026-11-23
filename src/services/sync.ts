@@ -8,6 +8,11 @@ export interface SyncDeps {
   lookup: (isbn: string) => Promise<LookupResult | null>;
   /** Returns the saved file's address, null if there is no cover; throws if it should be retried. */
   downloadCover: (url: string, bookId: number) => Promise<string | null>;
+  /**
+   * Asked before every request. Returning false (the user switched the app to
+   * Offline) stops the sync; whatever is left waits for next time.
+   */
+  canConnect?: () => boolean;
 }
 
 export interface SyncReport {
@@ -61,7 +66,11 @@ async function saveCover(deps: SyncDeps, book: Book): Promise<boolean> {
 export async function syncLibrary(deps: SyncDeps, onChange?: () => void): Promise<SyncReport> {
   const report: SyncReport = { lookedUp: 0, notFound: 0, coversSaved: 0, offline: false };
 
+  const canConnect = deps.canConnect ?? (() => true);
+  if (!canConnect()) return { ...report, offline: true };
+
   for (const book of await listPendingLookups(deps.db)) {
+    if (!canConnect()) return { ...report, offline: true };
     if (!book.isbn) {
       await updateBook(deps.db, book.id, { lookupState: 'failed' });
       continue;
@@ -93,6 +102,7 @@ export async function syncLibrary(deps: SyncDeps, onChange?: () => void): Promis
 
   const needCovers = (await listBooks(deps.db)).filter((b) => b.coverRemoteUrl && !b.coverLocalUri);
   for (const book of needCovers) {
+    if (!canConnect()) return { ...report, offline: true };
     try {
       if (await saveCover(deps, book)) report.coversSaved++;
       onChange?.();

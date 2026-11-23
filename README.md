@@ -16,6 +16,8 @@ Built with React Native + Expo (SDK 58), Expo Router and SQLite (`expo-sqlite`).
 
 Scanned books are saved immediately, even with no connection, and show as **Pending** until the phone is online. The app then looks up the exact edition by its ISBN, using [Open Library](https://openlibrary.org) first and [Google Books](https://books.google.com) to fill any gaps (both free, no account needed). It also downloads the cover to the phone, so covers show offline. This happens on its own when the app opens or the connection comes back. Your ratings, Read status and notes are never overwritten. **Settings → Add sample books** adds five books to try the library out.
 
+**Online / Offline switch.** The pill at the top of the Library and Scan tabs (also in **Settings → Internet**) decides whether the app may use the internet. While **Offline**, the app makes no requests at all: no lookups, no cover downloads, and covers aren't loaded from the web. Scanned books wait as *Pending* until you switch to **Online**, which starts the lookups straight away. The choice is remembered. Default: Online.
+
 Books without a barcode can be added with **+ Add** on the Library tab, and any book can be corrected with **Edit** on its page, including taking or choosing a photo for its cover.
 
 ## Website version

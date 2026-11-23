@@ -6,7 +6,7 @@ import 'react-native-reanimated';
 
 import { useColorScheme } from '@/components/useColorScheme';
 import { DbProvider } from '@/src/db/DbProvider';
-import { useBackgroundSync } from '@/src/services/backgroundSync';
+import { useBackgroundSync, useConnectionSettingLoaded } from '@/src/services/backgroundSync';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -49,8 +49,10 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
-  // Fill in details and covers for scanned books whenever the phone is online.
-  useBackgroundSync();
+  // Fill in details and covers for scanned books while the app is set to Online.
+  const ready = useConnectionSettingLoaded();
+  useBackgroundSync(ready);
+  if (!ready) return null;
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>

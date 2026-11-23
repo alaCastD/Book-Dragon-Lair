@@ -1,9 +1,10 @@
 import NetInfo from '@react-native-community/netinfo';
 import { useDb } from '../db/DbProvider';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { AppState, Platform } from 'react-native';
 
 import type { Db } from '../db';
+import { isOnlineAllowed, loadConnectionSetting, subscribeConnection } from './connection';
 import { downloadCover } from './covers';
 import { notifyLibraryChanged } from './libraryEvents';
 import { lookupIsbn, type Fetch } from './lookup';
@@ -22,6 +23,8 @@ let again = false;
  * afterwards so nothing requested in the meantime is missed.
  */
 export async function requestSync(db: Db): Promise<void> {
+  // Switched to Offline: don't touch the internet. Pending books wait.
+  if (!isOnlineAllowed()) return;
   if (running) {
     again = true;
     return;
@@ -35,6 +38,7 @@ export async function requestSync(db: Db): Promise<void> {
           db,
           lookup: (isbn) => lookupIsbn(fetch as unknown as Fetch, isbn),
           downloadCover,
+          canConnect: isOnlineAllowed,
         },
         notifyLibraryChanged,
       );
@@ -46,11 +50,15 @@ export async function requestSync(db: Db): Promise<void> {
   }
 }
 
-/** Syncs when the app starts, comes back to the foreground, or regains internet. */
-export function useBackgroundSync(): void {
+/**
+ * While the app is set to Online: syncs when the app starts, comes back to the
+ * foreground, regains internet, or is switched from Offline to Online.
+ */
+export function useBackgroundSync(ready: boolean): void {
   const db = useDb();
 
   useEffect(() => {
+    if (!ready) return;
     requestSync(db);
 
     const net = NetInfo.addEventListener((state) => {
@@ -59,9 +67,26 @@ export function useBackgroundSync(): void {
     const app = AppState.addEventListener('change', (s) => {
       if (s === 'active') requestSync(db);
     });
+    const unsubscribe = subscribeConnection(() => requestSync(db));
     return () => {
       net();
       app.remove();
+      unsubscribe();
     };
+  }, [db, ready]);
+}
+
+/**
+ * Loads the saved Online / Offline choice. Screens wait for it, so nothing
+ * reaches the internet before the app knows it's allowed to.
+ */
+export function useConnectionSettingLoaded(): boolean {
+  const db = useDb();
+  const [loaded, setLoaded] = useState(false);
+  useEffect(() => {
+    loadConnectionSetting(db)
+      .catch((e) => console.warn('Could not read the Online/Offline setting', e))
+      .finally(() => setLoaded(true));
   }, [db]);
+  return loaded;
 }
