@@ -9,6 +9,7 @@ import { useColors } from '@/src/components/useColors';
 import { requestSync } from '@/src/services/backgroundSync';
 import { BackupFormatError, buildBackup, importBackup, parseBackup, toCsv } from '@/src/services/backup';
 import { setOnlineAllowed, useOnlineAllowed } from '@/src/services/connection';
+import { useSyncStatus } from '@/src/services/syncStatus';
 import { readCoverBase64, writeCoverBase64 } from '@/src/services/covers';
 import { openTextFile, saveTextFile } from '@/src/services/files';
 import { notifyLibraryChanged, onLibraryChanged } from '@/src/services/libraryEvents';
@@ -21,6 +22,7 @@ export default function SettingsScreen() {
   const colors = useColors();
   const [busy, setBusy] = useState<string | null>(null);
   const online = useOnlineAllowed();
+  const syncStatus = useSyncStatus();
   const [pending, setPending] = useState(0);
 
   const loadPending = useCallback(() => {
@@ -119,6 +121,12 @@ export default function SettingsScreen() {
             {pending} scanned {pending === 1 ? 'book is' : 'books are'} waiting to be looked up
             {online ? '.' : ' \u2014 switch to Online to fill in their details.'}
           </Text>
+        )}
+        {online && pending > 0 && syncStatus?.problem && (
+          <Text style={[styles.note, { color: colors.danger }]}>Last try: {syncStatus.problem}</Text>
+        )}
+        {online && pending > 0 && (
+          <Button label="Look up now" onPress={() => requestSync(db)} busy={false} disabled={!!busy} colors={colors} />
         )}
       </Section>
 

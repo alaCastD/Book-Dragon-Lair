@@ -9,6 +9,7 @@ import { downloadCover } from './covers';
 import { notifyLibraryChanged } from './libraryEvents';
 import { lookupIsbn, type Fetch } from './lookup';
 import { syncLibrary } from './sync';
+import { setSyncStatus } from './syncStatus';
 
 // In a browser, NetInfo checks for internet by fetching the site's root
 // address, which doesn't exist on GitHub Pages. The browser's own
@@ -33,7 +34,7 @@ export async function requestSync(db: Db): Promise<void> {
   try {
     do {
       again = false;
-      await syncLibrary(
+      const report = await syncLibrary(
         {
           db,
           lookup: (isbn) => lookupIsbn(fetch as unknown as Fetch, isbn),
@@ -42,6 +43,10 @@ export async function requestSync(db: Db): Promise<void> {
         },
         notifyLibraryChanged,
       );
+      // Switching to Offline also stops a sync early; that isn't a problem to report.
+      const problem = report.offline && isOnlineAllowed() ? (report.problem ?? null) : null;
+      setSyncStatus({ at: new Date().toISOString(), problem });
+      if (problem) notifyLibraryChanged();
     } while (again);
   } catch (e) {
     console.warn('Book sync failed', e);

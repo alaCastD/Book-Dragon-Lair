@@ -21,6 +21,8 @@ export interface SyncReport {
   coversSaved: number;
   /** True if the sync stopped early because the internet wasn't reachable. */
   offline: boolean;
+  /** What went wrong, in words for the user, when the sync stopped early. */
+  problem?: string;
 }
 
 /**
@@ -81,6 +83,7 @@ export async function syncLibrary(deps: SyncDeps, onChange?: () => void): Promis
     } catch (e) {
       if (e instanceof LookupUnavailableError) {
         report.offline = true;
+        report.problem = e.message;
         return report;
       }
       throw e;
@@ -108,6 +111,7 @@ export async function syncLibrary(deps: SyncDeps, onChange?: () => void): Promis
       onChange?.();
     } catch {
       report.offline = true;
+      report.problem = "Couldn't download a cover (no response).";
       return report;
     }
   }
