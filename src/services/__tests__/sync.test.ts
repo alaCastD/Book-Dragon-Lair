@@ -141,3 +141,15 @@ it("never replaces a cover photo the user chose", async () => {
     coverRemoteUrl: null,
   });
 });
+
+it('says what went wrong when a lookup has to wait', async () => {
+  await scan('9780441172719');
+  const report = await syncLibrary(
+    deps({
+      lookup: async () => {
+        throw new LookupUnavailableError("Couldn't reach Open Library (no response).", 'network');
+      },
+    }),
+  );
+  expect(report).toMatchObject({ offline: true, problem: "Couldn't reach Open Library (no response)." });
+});

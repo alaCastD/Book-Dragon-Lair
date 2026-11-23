@@ -20,11 +20,38 @@ export interface LookupResult {
 }
 
 /** The lookup couldn't be completed (offline, timeout, server busy). Try again later. */
+/**
+ * Why a source couldn't answer:
+ * - `network`: no response at all (no connection, timeout, blocked).
+ * - `busy`: the service had a temporary problem (5xx). Worth retrying.
+ * - `refused`: the service turned the request away (429 too many requests,
+ *   403/401 denied). Google Books does this to apps without an API key.
+ */
+export type UnavailableKind = 'network' | 'busy' | 'refused';
+
 export class LookupUnavailableError extends Error {
-  constructor(message: string) {
+  constructor(
+    message: string,
+    readonly kind: UnavailableKind = 'network',
+  ) {
     super(message);
     this.name = 'LookupUnavailableError';
   }
+}
+
+function sourceName(url: string): string {
+  // (React Native's URL class can't read .host, so pull the host out by hand.)
+  const host = /^https?:\/\/([^/?#]+)/.exec(url)?.[1] ?? url;
+  if (host.endsWith('openlibrary.org')) return 'Open Library';
+  if (host.endsWith('googleapis.com')) return 'Google Books';
+  return host;
+}
+
+function httpProblem(url: string, status: number): LookupUnavailableError {
+  const name = sourceName(url);
+  if (status === 429) return new LookupUnavailableError(`${name} refused the request (too many requests).`, 'refused');
+  if (status === 401 || status === 403) return new LookupUnavailableError(`${name} refused the request (error ${status}).`, 'refused');
+  return new LookupUnavailableError(`${name} had a problem (error ${status}).`, 'busy');
 }
 
 export type Fetch = (url: string, init?: { signal?: AbortSignal }) => Promise<{
@@ -42,13 +69,11 @@ async function getJson(fetchFn: Fetch, url: string): Promise<any | null> {
   try {
     const res = await fetchFn(url, { signal: controller.signal });
     if (res.status === 404) return null;
-    if (!res.ok) throw new LookupUnavailableError(`${url} answered ${res.status}`);
+    if (!res.ok) throw httpProblem(url, res.status);
     return await res.json();
   } catch (e) {
     if (e instanceof LookupUnavailableError) throw e;
-    // (React Native's URL class can't read .host, so pull the host out by hand.)
-    const host = /^https?:\/\/([^/?#]+)/.exec(url)?.[1] ?? url;
-    throw new LookupUnavailableError(`Could not reach ${host}: ${(e as Error).message}`);
+    throw new LookupUnavailableError(`Couldn't reach ${sourceName(url)} (no response).`, 'network');
   } finally {
     clearTimeout(timer);
   }
@@ -152,8 +177,12 @@ export async function lookupGoogleBooks(fetchFn: Fetch, isbn: string): Promise<L
 
 /**
  * Returns the book's details, or null if neither source knows this ISBN.
- * Throws LookupUnavailableError if a source couldn't be reached, so the
- * book stays pending and is retried later instead of being marked "not found".
+ *
+ * Throws LookupUnavailableError (book stays pending, retried later) only when
+ * the answer might change soon: no connection, or a service having a
+ * temporary problem. If Open Library says it has no such book and Google
+ * Books turns the request away, that won't fix itself by waiting, so the
+ * book is reported as not found (the user can Try again).
  */
 export async function lookupIsbn(fetchFn: Fetch, isbn: string): Promise<LookupResult | null> {
   let unavailable: LookupUnavailableError | null = null;
@@ -171,16 +200,18 @@ export async function lookupIsbn(fetchFn: Fetch, isbn: string): Promise<LookupRe
   if (complete) return primary;
 
   let secondary: LookupResult | null = null;
+  let secondaryError: LookupUnavailableError | null = null;
   try {
     secondary = await lookupGoogleBooks(fetchFn, isbn);
   } catch (e) {
     if (!(e instanceof LookupUnavailableError)) throw e;
-    unavailable ??= e;
+    secondaryError = e;
   }
 
   if (!primary && !secondary) {
-    if (unavailable) throw unavailable;
-    return null;
+    const openLibrarySaidNo = unavailable === null;
+    if (openLibrarySaidNo && (secondaryError === null || secondaryError.kind === 'refused')) return null;
+    throw unavailable ?? secondaryError!;
   }
   if (!primary) return secondary;
   if (!secondary) return primary;

@@ -26,6 +26,7 @@ The same app runs in a browser at **https://alacastd.github.io/Book-Dragon-Lair/
 
 - The website keeps its library **in that browser on that device**. It's separate from the phone app and from other browsers, and clearing browsing data erases it. Use **Settings → Save a backup** to move books between them (restore the file on the other side).
 - Barcode scanning needs a browser with camera access and barcode support (e.g. Chrome on Android). Typing the ISBN works everywhere.
+- Google Books often refuses requests from apps without an API key ("too many requests"). The app then relies on Open Library; a book Open Library doesn't have is marked **Not found** (fix the ISBN with Edit, or type the details in) rather than waiting forever.
 - Downloaded covers aren't stored offline on the website; the browser shows them from Open Library / Google Books.
 - Under the hood, the website uses SQLite compiled to WebAssembly (sql.js), saved to the browser's IndexedDB storage, because expo-sqlite's web build needs server headers GitHub Pages can't send. Platform-specific code lives in `*.web.ts(x)` files next to the phone versions.
 

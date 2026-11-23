@@ -159,3 +159,34 @@ describe('lookupIsbn', () => {
     expect((await lookupIsbn(f, '9780441172719'))?.title).toBe('Dune');
   });
 });
+
+describe('when Google Books turns requests away', () => {
+  it('reports "not found" if Open Library has no such book, instead of waiting forever', async () => {
+    const f = fakeFetch({ [GOOGLE_URL]: 429 }); // Open Library: 404 (not in routes)
+    expect(await lookupIsbn(f, '9780441172719')).toBeNull();
+  });
+
+  it('still uses Open Library when it has the book', async () => {
+    const sparse = { title: 'Dune', publish_date: '1990' };
+    const r = await lookupIsbn(fakeFetch({ [OL_ISBN]: sparse, [GOOGLE_URL]: 429 }), '9780441172719');
+    expect(r?.title).toBe('Dune');
+  });
+
+  it('keeps waiting when Open Library is only temporarily down', async () => {
+    const f = fakeFetch({ 'https://openlibrary.org': 503, [GOOGLE_URL]: 429 });
+    await expect(lookupIsbn(f, '9780441172719')).rejects.toMatchObject({ kind: 'busy' });
+  });
+
+  it('keeps waiting when Google Books gets no response at all', async () => {
+    const f = fakeFetch({ 'https://www.googleapis.com': new TypeError('Network request failed') });
+    await expect(lookupIsbn(f, '9780441172719')).rejects.toMatchObject({ kind: 'network' });
+  });
+
+  it('explains problems in plain words', async () => {
+    const offline = fakeFetch({ 'https://openlibrary.org': new TypeError('Failed to fetch'), [GOOGLE_URL]: 429 });
+    await expect(lookupIsbn(offline, '9780441172719')).rejects.toThrow("Couldn't reach Open Library (no response).");
+    await expect(lookupGoogleBooks(fakeFetch({ [GOOGLE_URL]: 429 }), '9780441172719')).rejects.toThrow(
+      'Google Books refused the request (too many requests).',
+    );
+  });
+});

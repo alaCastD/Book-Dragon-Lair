@@ -10,6 +10,7 @@ import { StarRating } from '@/src/components/StarRating';
 import { useColors } from '@/src/components/useColors';
 import { requestSync } from '@/src/services/backgroundSync';
 import { setOnlineAllowed, useOnlineAllowed } from '@/src/services/connection';
+import { useSyncStatus } from '@/src/services/syncStatus';
 import { deleteCoverFile } from '@/src/services/covers';
 import { onLibraryChanged } from '@/src/services/libraryEvents';
 import type { Book, BookUpdate, ReadStatus } from '@/src/types';
@@ -27,6 +28,7 @@ export default function BookDetailScreen() {
   const db = useDb();
   const colors = useColors();
   const online = useOnlineAllowed();
+  const syncStatus = useSyncStatus();
 
   // undefined = still loading, null = not found
   const [book, setBook] = useState<Book | null | undefined>(undefined);
@@ -145,10 +147,19 @@ export default function BookDetailScreen() {
       {book.lookupState === 'pending' && (
         <View style={[styles.notice, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <Text style={{ color: colors.text, fontSize: 14, lineHeight: 20 }}>
-            {online
-              ? 'This book was scanned and saved. Its title, author, edition and cover will be filled in automatically when your phone has a connection.'
-              : 'This book was scanned and saved. The app is set to Offline, so its title, author, edition and cover will be looked up when you switch to Online.'}
+            {!online
+              ? 'This book was scanned and saved. The app is set to Offline, so its title, author, edition and cover will be looked up when you switch to Online.'
+              : syncStatus?.problem
+                ? `This book was saved, but the last lookup didn't finish: ${syncStatus.problem} The app will try again automatically.`
+                : 'This book was saved. Looking up its title, author, edition and cover…'}
           </Text>
+          {online && (
+            <Pressable accessibilityRole="button" onPress={() => requestSync(db)} hitSlop={8}>
+              <Text style={{ color: colors.tint, fontWeight: '600', fontSize: 15, marginTop: 8 }}>
+                Look up now
+              </Text>
+            </Pressable>
+          )}
           {!online && (
             <Pressable accessibilityRole="button" onPress={() => setOnlineAllowed(db, true)} hitSlop={8}>
               <Text style={{ color: colors.tint, fontWeight: '600', fontSize: 15, marginTop: 8 }}>
@@ -162,8 +173,9 @@ export default function BookDetailScreen() {
       {book.lookupState === 'failed' && (
         <View style={[styles.notice, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <Text style={{ color: colors.text, fontSize: 14, lineHeight: 20 }}>
-            Neither Open Library nor Google Books has details for this ISBN. You can still rate it and
-            mark it read.
+            Open Library has no details for this ISBN, and Google Books didn&apos;t have any either or
+            couldn&apos;t be checked. Check the ISBN with Edit, or fill in the details yourself. You
+            can still rate it and mark it read.
           </Text>
           <Pressable accessibilityRole="button" onPress={retryLookup} hitSlop={8}>
             <Text style={{ color: colors.tint, fontWeight: '600', fontSize: 15, marginTop: 8 }}>
