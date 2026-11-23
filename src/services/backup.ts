@@ -2,6 +2,8 @@ import { addBook, listBooks, type Db } from '../db';
 import type { Book, LookupState, ReadStatus } from '../types';
 import { parseIsbn } from './isbn';
 
+// Fixed label inside every backup file. Kept from the project's original name
+// on purpose: changing it would stop older backups from restoring.
 export const BACKUP_FORMAT = 'book-dragon-liar-backup';
 export const BACKUP_VERSION = 1;
 
