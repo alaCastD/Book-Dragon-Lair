@@ -130,7 +130,7 @@ export default function LibraryScreen() {
               </Text>
               <Text style={[styles.emptyText, { color: colors.mutedText }]}>
                 {libraryEmpty
-                  ? 'Open the Scan tab and point the camera at a book\'s barcode. To try the app first, add sample books from the Settings tab.'
+                  ? 'Open the Scan tab and point the camera at a book\'s barcode, or tap + Add to type one in. To try the app first, add sample books from the Settings tab.'
                   : 'Try a different search or filter.'}
               </Text>
             </View>

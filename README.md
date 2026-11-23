@@ -12,9 +12,19 @@ Built with React Native + Expo (SDK 58), Expo Router and SQLite (`expo-sqlite`).
 | 2 | Library grid (search, filter, sort) and book page (status, star rating, notes) | ✅ Done |
 | 3 | Barcode scanner (works offline), typed-ISBN fallback, duplicate detection | ✅ Done |
 | 4 | Online lookup of title/edition/cover, offline "pending" queue, covers saved to the phone | ✅ Done |
-| 5 | Manual entry, editing, backup export/import | Planned |
+| 5 | Add books by hand, edit details, cover photos, backup and restore, spreadsheet export | ✅ Done |
 
 Scanned books are saved immediately, even with no connection, and show as **Pending** until the phone is online. The app then looks up the exact edition by its ISBN, using [Open Library](https://openlibrary.org) first and [Google Books](https://books.google.com) to fill any gaps (both free, no account needed). It also downloads the cover to the phone, so covers show offline. This happens on its own when the app opens or the connection comes back. Your ratings, Read status and notes are never overwritten. **Settings → Add sample books** adds five books to try the library out.
+
+Books without a barcode can be added with **+ Add** on the Library tab, and any book can be corrected with **Edit** on its page, including taking or choosing a photo for its cover.
+
+## Backing up your library
+
+Your library is stored only on your phone. In **Settings**:
+
+- **Save a backup** creates one `.json` file with every book, rating, note and date, plus any cover photos you took. Save it to Google Drive, email it to yourself, etc.
+- **Restore from a backup** adds the books from a backup file. Books already in the library are left unchanged, so restoring twice is safe. Downloaded covers are fetched again when online.
+- **Export spreadsheet** creates a `.csv` file for Google Sheets or Excel. It's for viewing only and can't be restored.
 
 ## Getting the app on your phone
 
@@ -26,7 +36,7 @@ Every push to `main` builds an installable APK with GitHub Actions (`.github/wor
 
 To update, install the newer APK over the old one; your library is kept.
 
-> The APK is signed with Android's standard debug key, which is fine for installing on your own phone but not for the Play Store. If you ever reinstall from a build signed with a different key, Android will require uninstalling first, **which deletes the library**; use the backup export (step 5) before doing that.
+> The APK is signed with Android's standard debug key, which is fine for installing on your own phone but not for the Play Store. If you ever install a build signed with a different key, Android will require uninstalling first, **which deletes the library**. Save a backup (Settings → Save a backup) before doing that.
 
 ## Development
 
@@ -52,13 +62,15 @@ npm run android
 
 ```
 app/                     Screens (Expo Router: each file is a route)
+  edit-book.tsx          Add a book by hand / edit a book
   (tabs)/index.tsx       Library
   (tabs)/scan.tsx        Barcode scanner
   (tabs)/settings.tsx    Settings
   book/[id].tsx          Book page
 src/
   db/                    SQLite schema, migrations and queries
-  services/              ISBN validation, scanning, book lookup, cover saving, background sync
+  services/              ISBN validation, scanning, book lookup, covers, background sync,
+                         add/edit form rules, backup/restore and CSV export
   components/            Cover, star rating, book tile, segmented control
   data/sampleBooks.ts    Sample books for trying the app
   utils/                 Small helpers

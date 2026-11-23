@@ -41,3 +41,29 @@ export function deleteCoverFile(uri: string | null): void {
     // Not worth bothering the user about.
   }
 }
+
+/** A new file name each time, so the phone doesn't keep showing an old cached image. */
+function freshCoverFile(bookId: number): File {
+  return new File(coversDir(), `cover-${bookId}-${Date.now()}.jpg`);
+}
+
+/** Copies a photo (from the camera or gallery) into app storage as the book's cover. */
+export async function saveCoverPhoto(sourceUri: string, bookId: number): Promise<string> {
+  const target = freshCoverFile(bookId);
+  await new File(sourceUri).copy(target);
+  return target.uri;
+}
+
+/** A saved cover as base64, for putting into a backup file. */
+export async function readCoverBase64(uri: string): Promise<string | null> {
+  const f = new File(uri);
+  return f.exists ? f.base64() : null;
+}
+
+/** Writes a cover from a backup file into app storage. */
+export async function writeCoverBase64(base64: string, bookId: number): Promise<string> {
+  const target = freshCoverFile(bookId);
+  target.create({ overwrite: true });
+  await target.write(base64, { encoding: 'base64' });
+  return target.uri;
+}

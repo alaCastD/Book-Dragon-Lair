@@ -28,8 +28,11 @@ export interface Book {
   dateRead: string | null;
 }
 
-/** Fields accepted when creating a book. Everything except `title` is optional. */
-export type NewBook = Partial<Omit<Book, 'id' | 'dateAdded'>> & { title: string };
+/**
+ * Fields accepted when creating a book. Everything except `title` is optional;
+ * `dateAdded` defaults to now (a restored backup passes the original date).
+ */
+export type NewBook = Partial<Omit<Book, 'id'>> & { title: string };
 
 /** Fields that can be changed on an existing book. */
 export type BookUpdate = Partial<Omit<Book, 'id' | 'dateAdded'>>;

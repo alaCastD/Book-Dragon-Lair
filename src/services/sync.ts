@@ -40,7 +40,8 @@ export function fieldsFromLookup(book: Book, found: LookupResult): BookUpdate {
   fill('edition', found.edition);
   fill('pageCount', found.pageCount);
   fill('format', found.format);
-  fill('coverRemoteUrl', found.coverUrl);
+  // A cover the user chose themselves (a photo) is never replaced.
+  if (!book.coverLocalUri) fill('coverRemoteUrl', found.coverUrl);
   return changes;
 }
 

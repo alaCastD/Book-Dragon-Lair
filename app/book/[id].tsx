@@ -119,7 +119,19 @@ export default function BookDetailScreen() {
       style={{ backgroundColor: colors.background }}
       contentContainerStyle={styles.content}
       keyboardShouldPersistTaps="handled">
-      <Stack.Screen options={{ title: book.title }} />
+      <Stack.Screen
+        options={{
+          title: book.title,
+          headerRight: () => (
+            <Pressable
+              accessibilityRole="button"
+              hitSlop={8}
+              onPress={() => router.push({ pathname: '/edit-book', params: { id: String(book.id) } })}>
+              <Text style={{ color: colors.tint, fontSize: 16, fontWeight: '600' }}>Edit</Text>
+            </Pressable>
+          ),
+        }}
+      />
 
       <View style={styles.top}>
         <BookCover book={book} style={styles.cover} fallbackFontSize={16} />

@@ -47,6 +47,15 @@
           "microphonePermission": false,
           "recordAudioAndroid": false
         }
+      ],
+      "expo-sharing",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Book Inventory lets you pick a photo to use as a book cover.",
+          "cameraPermission": "Book Inventory uses the camera to scan book barcodes and photograph covers.",
+          "microphonePermission": false
+        }
       ]
     ],
     "experiments": {
