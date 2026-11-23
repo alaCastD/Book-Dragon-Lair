@@ -1,6 +1,8 @@
-import { useDb } from '@/src/db/DbProvider';
+import { File, Paths } from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
+import { useSQLiteContext } from 'expo-sqlite';
 import { useState } from 'react';
-import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { listBooks } from '@/src/db';
 import { addSampleBooks } from '@/src/data/sampleBooks';
@@ -8,14 +10,20 @@ import { useColors } from '@/src/components/useColors';
 import { requestSync } from '@/src/services/backgroundSync';
 import { BackupFormatError, buildBackup, importBackup, parseBackup, toCsv } from '@/src/services/backup';
 import { readCoverBase64, writeCoverBase64 } from '@/src/services/covers';
-import { openTextFile, saveTextFile } from '@/src/services/files';
 import { notifyLibraryChanged } from '@/src/services/libraryEvents';
-import { showMessage } from '@/src/utils/dialogs';
 
 const today = () => new Date().toISOString().slice(0, 10);
 
+/** Writes text to a temporary file and opens the share sheet (Drive, email, Files…). */
+async function shareText(name: string, text: string, mimeType: string, dialogTitle: string) {
+  const file = new File(Paths.cache, name);
+  file.create({ overwrite: true });
+  await file.write(text);
+  await Sharing.shareAsync(file.uri, { mimeType, dialogTitle });
+}
+
 export default function SettingsScreen() {
-  const db = useDb();
+  const db = useSQLiteContext();
   const colors = useColors();
   const [busy, setBusy] = useState<string | null>(null);
 
@@ -25,7 +33,7 @@ export default function SettingsScreen() {
       await task();
     } catch (e) {
       const message = e instanceof BackupFormatError ? e.message : `Something went wrong: ${(e as Error).message}`;
-      showMessage('Not done', message);
+      Alert.alert('Not done', message);
     } finally {
       setBusy(null);
     }
@@ -36,7 +44,7 @@ export default function SettingsScreen() {
       const added = await addSampleBooks(db);
       notifyLibraryChanged();
       requestSync(db); // saves their covers to the phone
-      showMessage(
+      Alert.alert(
         added ? 'Sample books added' : 'Already added',
         added
           ? `${added} sample books are now in your library. You can remove them from each book's page.`
@@ -48,10 +56,10 @@ export default function SettingsScreen() {
     run('backup', async () => {
       const backup = await buildBackup(db, readCoverBase64);
       if (backup.books.length === 0) {
-        showMessage('Nothing to back up', 'Your library is empty.');
+        Alert.alert('Nothing to back up', 'Your library is empty.');
         return;
       }
-      await saveTextFile(
+      await shareText(
         `book-inventory-backup-${today()}.json`,
         JSON.stringify(backup),
         'application/json',
@@ -63,17 +71,17 @@ export default function SettingsScreen() {
     run('csv', async () => {
       const books = await listBooks(db, { sort: 'title' });
       if (books.length === 0) {
-        showMessage('Nothing to export', 'Your library is empty.');
+        Alert.alert('Nothing to export', 'Your library is empty.');
         return;
       }
-      await saveTextFile(`book-inventory-${today()}.csv`, toCsv(books), 'text/csv', 'Export your library');
+      await shareText(`book-inventory-${today()}.csv`, toCsv(books), 'text/csv', 'Export your library');
     });
 
   const onRestore = () =>
     run('restore', async () => {
-      const text = await openTextFile();
-      if (text === null) return;
-      const parsed = parseBackup(text);
+      const picked = await File.pickFileAsync({ mimeTypes: ['application/json', 'application/octet-stream', '*/*'] });
+      if (picked.canceled) return;
+      const parsed = parseBackup(await picked.result.text());
       const report = await importBackup(db, parsed, writeCoverBase64);
       notifyLibraryChanged();
       requestSync(db); // re-downloads covers and finishes any pending lookups
@@ -82,16 +90,15 @@ export default function SettingsScreen() {
       if (report.alreadyHad) lines.push(`${report.alreadyHad} already in your library (left unchanged).`);
       if (report.skipped) lines.push(`${report.skipped} damaged ${report.skipped === 1 ? 'entry' : 'entries'} skipped.`);
       if (report.added) lines.push('Covers will download when you are online.');
-      showMessage('Backup restored', lines.join('\n'));
+      Alert.alert('Backup restored', lines.join('\n'));
     });
 
   return (
     <ScrollView style={{ backgroundColor: colors.background }} contentContainerStyle={styles.container}>
       <Section title="Backup" colors={colors}>
         <Text style={[styles.body, { color: colors.mutedText }]}>
-          {Platform.OS === 'web'
-            ? 'On the website, your library is saved only in this browser on this device. Save a backup before clearing browsing data or switching browsers.'
-            : 'Your library lives only on this phone. Save a backup somewhere safe (Google Drive, email to yourself) before changing phones or uninstalling the app.'}
+          Your library lives only on this phone. Save a backup somewhere safe (Google Drive, email to
+          yourself) before changing phones or uninstalling the app.
         </Text>
         <Button label="Save a backup" onPress={onExportBackup} busy={busy === 'backup'} disabled={!!busy} colors={colors} primary />
         <Button label="Restore from a backup" onPress={onRestore} busy={busy === 'restore'} disabled={!!busy} colors={colors} />

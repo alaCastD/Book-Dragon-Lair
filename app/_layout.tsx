@@ -1,11 +1,12 @@
 import { useFonts } from 'expo-font';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { SQLiteProvider } from 'expo-sqlite';
+import { Suspense, useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/components/useColorScheme';
-import { DbProvider } from '@/src/db/DbProvider';
+import { DATABASE_NAME, migrate } from '@/src/db';
 import { useBackgroundSync } from '@/src/services/backgroundSync';
 
 export {
@@ -40,10 +41,12 @@ export default function RootLayout() {
   }
 
   return (
-    // Opens the library (on the phone, or in the browser on the website) before any screen renders.
-    <DbProvider>
-      <RootLayoutNav />
-    </DbProvider>
+    <Suspense fallback={null}>
+      {/* Opens (or creates) the on-device database and runs migrations before any screen renders. */}
+      <SQLiteProvider databaseName={DATABASE_NAME} onInit={migrate} useSuspense>
+        <RootLayoutNav />
+      </SQLiteProvider>
+    </Suspense>
   );
 }
 

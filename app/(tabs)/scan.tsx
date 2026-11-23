@@ -1,7 +1,7 @@
 import { CameraView, useCameraPermissions, type BarcodeScanningResult } from 'expo-camera';
 import * as Haptics from 'expo-haptics';
 import { router, useFocusEffect } from 'expo-router';
-import { useDb } from '@/src/db/DbProvider';
+import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -53,7 +53,7 @@ function bannerFor(outcome: ScanOutcome): Banner {
 }
 
 export default function ScanScreen() {
-  const db = useDb();
+  const db = useSQLiteContext();
   const colors = useColors();
   const [permission, requestPermission] = useCameraPermissions();
 

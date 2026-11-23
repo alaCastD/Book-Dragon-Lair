@@ -39,6 +39,3 @@ yarn-error.*
 # generated native folders
 /ios
 /android
-
-# web version: copied from node_modules by scripts/copy-sqljs-wasm.js
-public/sql-wasm-browser.wasm
