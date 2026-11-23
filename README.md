@@ -36,6 +36,8 @@ Every push to `main` builds an installable APK with GitHub Actions (`.github/wor
 
 To update, install the newer APK over the old one; your library is kept.
 
+The APK is built for 64-bit ARM phones (`arm64-v8a`), which covers practically every Android phone from about 2017 onward. It won't install on an x86 emulator.
+
 > The APK is signed with Android's standard debug key, which is fine for installing on your own phone but not for the Play Store. If you ever install a build signed with a different key, Android will require uninstalling first, **which deletes the library**. Save a backup (Settings → Save a backup) before doing that.
 
 ## Development
