@@ -31,6 +31,9 @@ import {
 import { deleteCoverFile, saveCoverPhoto } from '@/src/services/covers';
 import { notifyLibraryChanged } from '@/src/services/libraryEvents';
 import type { Book } from '@/src/types';
+import { shortDate } from '@/src/utils/format';
+import { EARLIEST_FINISHED, finishedIso, pickerDate } from '@/src/utils/finishedDate';
+import { pickDate } from '@/src/utils/pickDate';
 import { showMessage } from '@/src/utils/dialogs';
 
 type CoverChange = { kind: 'keep' } | { kind: 'new'; uri: string } | { kind: 'remove' };
@@ -76,6 +79,15 @@ export default function EditBookScreen() {
   const set = <K extends keyof BookForm>(key: K) => (value: BookForm[K]) => {
     setForm((f) => ({ ...f, [key]: value }));
     if (errors[key]) setErrors((e) => ({ ...e, [key]: undefined }));
+  };
+
+  const chooseFinishedDate = async () => {
+    const day = await pickDate({
+      value: pickerDate(form.dateRead),
+      minimumDate: EARLIEST_FINISHED,
+      maximumDate: new Date(),
+    });
+    if (day) set('dateRead')(finishedIso(day));
   };
 
   const takePhoto = async () => {
@@ -146,7 +158,7 @@ export default function EditBookScreen() {
   const hasCover = previewBook.coverLocalUri !== null || previewBook.coverRemoteUrl !== null;
 
   const field = (
-    key: Exclude<keyof BookForm, 'status' | 'rating'>,
+    key: Exclude<keyof BookForm, 'status' | 'rating' | 'dateRead'>,
     label: string,
     opts: { placeholder?: string; keyboardType?: KeyboardTypeOptions; required?: boolean } = {},
   ) => (
@@ -213,6 +225,32 @@ export default function EditBookScreen() {
           <Text style={[styles.label, { color: colors.mutedText }]}>Status</Text>
           <SegmentedControl options={STATUS_OPTIONS} value={form.status} onChange={set('status')} />
         </View>
+        {form.status === 'read' && (
+          <View style={styles.field}>
+            <Text style={[styles.label, { color: colors.mutedText }]}>Finished on</Text>
+            <Pressable
+              onPress={chooseFinishedDate}
+              accessibilityRole="button"
+              accessibilityLabel={`Finished on ${shortDate(form.dateRead ?? new Date().toISOString())}. Change date`}
+              style={[
+                styles.input,
+                styles.dateButton,
+                {
+                  backgroundColor: colors.card,
+                  borderColor: errors.dateRead ? colors.danger : colors.border,
+                },
+              ]}>
+              <Text style={{ color: colors.text, fontSize: 16 }}>
+                {shortDate(form.dateRead ?? new Date().toISOString())}
+                {form.dateRead ? '' : ' (today)'}
+              </Text>
+              <Text style={{ color: colors.tint, fontWeight: '600', fontSize: 15 }}>Change</Text>
+            </Pressable>
+            {errors.dateRead ? (
+              <Text style={[styles.error, { color: colors.danger }]}>{errors.dateRead}</Text>
+            ) : null}
+          </View>
+        )}
         <View style={styles.field}>
           <Text style={[styles.label, { color: colors.mutedText }]}>Your rating</Text>
           <StarRating rating={form.rating} onChange={set('rating')} size={32} />
@@ -277,6 +315,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   error: { fontSize: 13 },
+  dateButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   save: { marginTop: 8, borderRadius: 10, paddingVertical: 14, alignItems: 'center' },
   saveText: { fontSize: 16, fontWeight: '700' },
 });

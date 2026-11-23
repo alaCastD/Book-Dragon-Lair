@@ -103,3 +103,49 @@ describe('saveBookForm', () => {
     expect(r.ok && r.book).toMatchObject({ status: 'to_read', dateRead: null, rating: 3 });
   });
 });
+
+describe('finished date', () => {
+  let db2: ReturnType<typeof createTestDb>;
+  beforeEach(async () => {
+    db2 = createTestDb();
+    await migrate(db2);
+  });
+  afterEach(() => db2.close());
+
+  it('uses the date the user picked when adding a read book', async () => {
+    const picked = new Date(2021, 6, 4, 12).toISOString();
+    const r = await saveBookForm(db2, form({ title: 'Dune', status: 'read', dateRead: picked }));
+    expect(r.ok && r.book.dateRead).toBe(picked);
+  });
+
+  it('uses today when no date was picked', async () => {
+    const before = Date.now();
+    const r = await saveBookForm(db2, form({ title: 'Dune', status: 'read' }));
+    expect(r.ok && new Date(r.book.dateRead!).getTime()).toBeGreaterThanOrEqual(before - 1000);
+  });
+
+  it('changes the finished date of a book already read', async () => {
+    const b = await addBook(db2, { title: 'Dune', status: 'read' });
+    const picked = new Date(2019, 0, 15, 12).toISOString();
+    const r = await saveBookForm(db2, { ...formFromBook(b), dateRead: picked }, b.id);
+    expect(r.ok && r.book).toMatchObject({ status: 'read', dateRead: picked });
+  });
+
+  it('refuses a finished date in the future', async () => {
+    const future = new Date(Date.now() + 3 * 86400000).toISOString();
+    const r = await saveBookForm(db2, form({ title: 'Dune', status: 'read', dateRead: future }));
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.errors.dateRead).toMatch(/future/);
+  });
+
+  it('ignores a picked date when the book is To Be Read', async () => {
+    const r = await saveBookForm(db2, form({ title: 'Dune', status: 'to_read', dateRead: new Date(2020, 1, 1).toISOString() }));
+    expect(r.ok && r.book.dateRead).toBeNull();
+  });
+
+  it('can set the finished date directly (book page "Change")', async () => {
+    const b = await addBook(db2, { title: 'Dune', status: 'read' });
+    const picked = new Date(2018, 3, 3, 12).toISOString();
+    expect((await updateBook(db2, b.id, { dateRead: picked }))?.dateRead).toBe(picked);
+  });
+});

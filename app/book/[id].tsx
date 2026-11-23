@@ -15,7 +15,9 @@ import { deleteCoverFile } from '@/src/services/covers';
 import { onLibraryChanged } from '@/src/services/libraryEvents';
 import type { Book, BookUpdate, ReadStatus } from '@/src/types';
 import { shortDate } from '@/src/utils/format';
-import { confirmAction } from '@/src/utils/dialogs';
+import { EARLIEST_FINISHED, finishedDateProblem, finishedIso, pickerDate } from '@/src/utils/finishedDate';
+import { pickDate } from '@/src/utils/pickDate';
+import { confirmAction, showMessage } from '@/src/utils/dialogs';
 
 const STATUS_OPTIONS = [
   { value: 'to_read', label: 'To Be Read' },
@@ -69,6 +71,22 @@ export default function BookDetailScreen() {
     requestSync(db);
   };
 
+  const changeFinishedDate = async () => {
+    if (!book) return;
+    const day = await pickDate({
+      value: pickerDate(book.dateRead),
+      minimumDate: EARLIEST_FINISHED,
+      maximumDate: new Date(),
+    });
+    if (!day) return;
+    const problem = finishedDateProblem(day);
+    if (problem) {
+      showMessage('Date not changed', problem);
+      return;
+    }
+    await save({ dateRead: finishedIso(day) });
+  };
+
   const saveNotes = useCallback(() => {
     const value = typedNotes.current.trim() || null;
     if (value === savedNotes.current) return;
@@ -109,7 +127,6 @@ export default function BookDetailScreen() {
     ['Pages', book.pageCount ? String(book.pageCount) : null],
     ['ISBN', book.isbn],
     ['Added', shortDate(book.dateAdded)],
-    ['Finished', book.status === 'read' ? shortDate(book.dateRead) : null],
   ];
 
   return (
@@ -192,6 +209,20 @@ export default function BookDetailScreen() {
           value={book.status}
           onChange={(status: ReadStatus) => save({ status })}
         />
+        {book.status === 'read' && (
+          <View style={styles.finishedRow}>
+            <Text style={[styles.finishedText, { color: colors.text }]}>
+              Finished on <Text style={{ fontWeight: '700' }}>{shortDate(book.dateRead) ?? 'unknown date'}</Text>
+            </Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Change the date you finished this book"
+              onPress={changeFinishedDate}
+              hitSlop={8}>
+              <Text style={{ color: colors.tint, fontWeight: '600', fontSize: 15 }}>Change</Text>
+            </Pressable>
+          </View>
+        )}
       </Section>
 
       <Section title="Your rating" colors={colors}>
@@ -268,6 +299,8 @@ const styles = StyleSheet.create({
   section: { gap: 10 },
   sectionTitle: { fontSize: 12, fontWeight: '700', letterSpacing: 0.6 },
   hint: { fontSize: 13 },
+  finishedRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
+  finishedText: { fontSize: 15, flexShrink: 1 },
   detailRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',

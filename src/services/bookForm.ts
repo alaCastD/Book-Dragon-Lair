@@ -1,5 +1,6 @@
 import { findByIsbn, addBook, getBook, updateBook, type Db } from '../db';
 import type { Book, BookUpdate, ReadStatus } from '../types';
+import { finishedDateProblem } from '../utils/finishedDate';
 import { formatIsbn, parseIsbn } from './isbn';
 
 /** What the add/edit form holds: text boxes are strings, the rest as chosen. */
@@ -15,6 +16,8 @@ export interface BookForm {
   pageCount: string;
   status: ReadStatus;
   rating: number;
+  /** When it was finished (ISO); null means "today" when marked read. Ignored unless status is read. */
+  dateRead: string | null;
 }
 
 export type FormErrors = Partial<Record<keyof BookForm, string>>;
@@ -32,6 +35,7 @@ export function emptyForm(): BookForm {
     pageCount: '',
     status: 'to_read',
     rating: 0,
+    dateRead: null,
   };
 }
 
@@ -48,6 +52,7 @@ export function formFromBook(b: Book): BookForm {
     pageCount: b.pageCount ? String(b.pageCount) : '',
     status: b.status,
     rating: b.rating,
+    dateRead: b.status === 'read' ? b.dateRead : null,
   };
 }
 
@@ -76,6 +81,11 @@ export function validateForm(
     else errors.pageCount = 'Enter a whole number of pages, or leave it blank.';
   }
 
+  if (form.status === 'read' && form.dateRead) {
+    const problem = finishedDateProblem(new Date(form.dateRead));
+    if (problem) errors.dateRead = problem;
+  }
+
   if (Object.keys(errors).length) return { ok: false, errors };
 
   return {
@@ -92,6 +102,8 @@ export function validateForm(
       pageCount,
       status: form.status,
       rating: form.rating,
+      // Read with no date chosen: the database fills in today.
+      dateRead: form.status === 'read' ? (form.dateRead ?? undefined) : null,
     },
   };
 }
