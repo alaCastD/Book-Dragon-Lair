@@ -1,10 +1,9 @@
 import * as ImagePicker from 'expo-image-picker';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
-import { useSQLiteContext } from 'expo-sqlite';
+import { useDb } from '@/src/db/DbProvider';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Image,
   KeyboardAvoidingView,
   Pressable,
@@ -32,6 +31,7 @@ import {
 import { deleteCoverFile, saveCoverPhoto } from '@/src/services/covers';
 import { notifyLibraryChanged } from '@/src/services/libraryEvents';
 import type { Book } from '@/src/types';
+import { showMessage } from '@/src/utils/dialogs';
 
 type CoverChange = { kind: 'keep' } | { kind: 'new'; uri: string } | { kind: 'remove' };
 
@@ -52,7 +52,7 @@ export default function EditBookScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const bookId = id ? Number(id) : undefined;
   const editing = bookId !== undefined;
-  const db = useSQLiteContext();
+  const db = useDb();
   const colors = useColors();
 
   const [original, setOriginal] = useState<Book | null>(null);
@@ -81,7 +81,7 @@ export default function EditBookScreen() {
   const takePhoto = async () => {
     const perm = await ImagePicker.requestCameraPermissionsAsync();
     if (!perm.granted) {
-      Alert.alert('Camera access needed', 'Allow camera access in your phone settings to photograph a cover.');
+      showMessage('Camera access needed', 'Allow camera access in your phone settings to photograph a cover.');
       return;
     }
     const r = await ImagePicker.launchCameraAsync(PICKER_OPTIONS);
@@ -119,7 +119,7 @@ export default function EditBookScreen() {
       if (editing) router.back();
       else router.replace({ pathname: '/book/[id]', params: { id: String(book.id) } });
     } catch (e) {
-      Alert.alert("Couldn't save", (e as Error).message);
+      showMessage("Couldn't save", (e as Error).message);
     } finally {
       setSaving(false);
     }
