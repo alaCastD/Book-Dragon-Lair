@@ -2,6 +2,7 @@ import { SymbolView } from 'expo-symbols';
 import { router, Tabs } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
 
+import { AppBackground } from '@/src/components/AppBackground';
 import { ConnectionToggle } from '@/src/components/ConnectionToggle';
 
 import Colors from '@/constants/Colors';
@@ -12,6 +13,10 @@ export default function TabLayout() {
 
   return (
     <Tabs
+      // Each tab paints its own patterned background. Tabs you've left stay
+      // loaded underneath (switching back is instant); an opaque background
+      // per tab keeps them from showing through the current one.
+      screenLayout={({ children }) => <AppBackground>{children}</AppBackground>}
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme].tabIconSelected,
         tabBarInactiveTintColor: Colors[colorScheme].tabIconDefault,

@@ -66,8 +66,12 @@ async function save(key: string, bytes: Uint8Array): Promise<void> {
 
 /**
  * Wraps a sql.js database as the app's `Db`. Every change is written to
- * IndexedDB shortly afterwards (batched), and right away if the tab is hidden
- * or closed, so nothing is lost.
+ * IndexedDB straight away: writes made in the same moment (e.g. one book
+ * save) are combined into a single save that starts as soon as they finish.
+ * Saving is also forced when the tab is hidden or closed.
+ *
+ * (It used to wait 300 ms to batch more writes; closing or reloading the tab
+ * inside that window lost the latest change.)
  */
 export function createWebDb(db: Database, storageKey: string): Db & { flush(): Promise<void> } {
   let depth = 0;
@@ -79,11 +83,16 @@ export function createWebDb(db: Database, storageKey: string): Db & { flush(): P
     timer = null;
     if (!dirty || depth > 0) return;
     dirty = false;
-    await save(storageKey, db.export());
+    try {
+      await save(storageKey, db.export());
+    } catch (e) {
+      dirty = true; // keep it unsaved so the next change (or leaving the tab) tries again
+      console.warn('Could not save the library in this browser', e);
+    }
   };
   const changed = () => {
     dirty = true;
-    if (!timer) timer = setTimeout(() => void flush(), 300);
+    if (!timer) timer = setTimeout(() => void flush(), 0);
   };
 
   if (typeof document !== 'undefined') {

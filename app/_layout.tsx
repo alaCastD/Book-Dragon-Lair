@@ -58,8 +58,13 @@ function RootLayoutNav() {
 
   return (
     <ThemeProvider value={navigationTheme(colorScheme)}>
-      <AppBackground>
       <Stack
+        // Each page paints its own patterned background, so it fully covers
+        // whatever is underneath (see screenLayout in app/(tabs)/_layout.tsx).
+        // The tabs group has its own per-tab backgrounds.
+        screenLayout={({ route, children }) =>
+          route.name === '(tabs)' ? children : <AppBackground>{children}</AppBackground>
+        }
         screenOptions={{
           contentStyle: { backgroundColor: 'transparent' },
           headerStyle: { backgroundColor: Colors[colorScheme].base },
@@ -70,7 +75,6 @@ function RootLayoutNav() {
         <Stack.Screen name="book/[id]" options={{ title: '' }} />
         <Stack.Screen name="edit-book" options={{ title: '' }} />
       </Stack>
-      </AppBackground>
     </ThemeProvider>
   );
 }
