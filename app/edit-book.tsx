@@ -194,6 +194,22 @@ export default function EditBookScreen() {
         style={{ backgroundColor: 'transparent' }}
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled">
+        {!editing && (
+          <Pressable
+            onPress={() => router.replace('/search-book')}
+            accessibilityRole="button"
+            style={({ pressed }) => [
+              styles.searchCard,
+              { backgroundColor: colors.card, borderColor: colors.tint, opacity: pressed ? 0.7 : 1 },
+            ]}>
+            <Text style={{ color: colors.text, fontWeight: '700', fontSize: 15 }}>Know the title?</Text>
+            <Text style={{ color: colors.mutedText, fontSize: 14, lineHeight: 20 }}>
+              Search by title and pick your edition. Its details and cover are filled in for you.
+            </Text>
+            <Text style={{ color: colors.tint, fontWeight: '600', fontSize: 15 }}>Search by title ›</Text>
+          </Pressable>
+        )}
+
         <View style={styles.coverRow}>
           {cover.kind === 'new' ? (
             <View style={[styles.coverBox, { borderColor: colors.border }]}>
@@ -315,6 +331,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   error: { fontSize: 13 },
+  searchCard: { borderWidth: 1, borderRadius: 10, padding: 12, gap: 4 },
   dateButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   save: { marginTop: 8, borderRadius: 10, paddingVertical: 14, alignItems: 'center' },
   saveText: { fontSize: 16, fontWeight: '700' },

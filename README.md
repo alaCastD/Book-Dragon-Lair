@@ -22,6 +22,8 @@ Scanned books are saved immediately, even with no connection, and show as **Pend
 
 **Online / Offline switch.** The pill at the top of the Library and Scan tabs (also in **Settings → Internet**) decides whether the app may use the internet. While **Offline**, the app makes no requests at all: no lookups, no cover downloads, and covers aren't loaded from the web. Scanned books wait as *Pending* until you switch to **Online**, which starts the lookups straight away. The choice is remembered. Default: Online.
 
+**Search by title.** In **+ Add** (or on the Scan tab), *Search by title* finds books on Open Library by title and optional author. You pick the book, then **your edition**: editions in your device's language come first, with publisher, year, format, pages and ISBN to compare against your copy. *Show more* loads further editions, and *All languages* shows the rest. The chosen edition is added with its details and cover, and an ISBN you already own is refused. If your edition isn't listed, *Can't find your edition?* adds the book and opens Edit so you can fill in your copy's details. Needs the app to be Online.
+
 Books without a barcode can be added with **+ Add** on the Library tab, and any book can be corrected with **Edit** on its page, including taking or choosing a photo for its cover.
 
 ## Website version

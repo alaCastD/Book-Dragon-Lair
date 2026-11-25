@@ -74,6 +74,8 @@ function RootLayoutNav() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="book/[id]" options={{ title: '' }} />
         <Stack.Screen name="edit-book" options={{ title: '' }} />
+        <Stack.Screen name="search-book" options={{ title: '' }} />
+        <Stack.Screen name="search-editions" options={{ title: '' }} />
       </Stack>
     </ThemeProvider>
   );
