@@ -146,6 +146,11 @@ export default function ScanScreen() {
             {permission.canAskAgain ? 'Allow camera' : 'Open phone settings'}
           </Text>
         </Pressable>
+        <Pressable accessibilityRole="button" onPress={() => router.push('/search-book')} hitSlop={8}>
+          <Text style={{ color: colors.tint, fontWeight: '600', fontSize: 15, marginTop: 12 }}>
+            Or search by title instead
+          </Text>
+        </Pressable>
       </View>
     );
   }
@@ -222,6 +227,14 @@ export default function ScanScreen() {
             onPress={() => setTyping(true)}
             style={({ pressed }) => [styles.typeLink, { opacity: pressed ? 0.6 : 1 }]}>
             <Text style={styles.typeLinkText}>Barcode won&apos;t scan? Type the ISBN</Text>
+          </Pressable>
+        )}
+        {!typing && (
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => router.push('/search-book')}
+            style={({ pressed }) => [styles.typeLink, { opacity: pressed ? 0.6 : 1 }]}>
+            <Text style={styles.typeLinkText}>No barcode? Search by title</Text>
           </Pressable>
         )}
       </View>
